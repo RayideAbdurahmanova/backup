@@ -1,0 +1,30 @@
+{
+    "common": {
+        "location_permission": "Məkan icazəsi",
+        "location_permission_message": "Bu tətbiqin namaz vaxtlarını düzgün göstərməsi üçün məkanınıza giriş icazəsi lazımdır.",
+        "ask_later": "Sonra soruş",
+        "cancel": "Ləğv et",
+        "ok": "OK",
+        "error": "Xəta",
+        "location_denied": "Məkan icazəsi verilmədi",
+        "location_denied_message": "Namaz vaxtları təxmini məkana görə göstəriləcək.",
+        "location_error": "Məkan müəyyən edilə bilmədi."
+    },
+    "prayer_times": {
+        "fajr": "İmsak",
+        "sunrise": "Günəş",
+        "dhuhr": "Günorta",
+        "asr": "Əsr",
+        "maghrib": "Məğrib",
+        "isha": "İşa"
+    },
+    "date": {
+        "ramadan": "Ramazan",
+        "hijri": "Hicri"
+    },
+    "tabs": {
+        "azan_times": "Namaz Vaxtları",
+        "iftar_time": "İftar Vaxtı",
+        "notifications": "Bildirişlər"
+    }
+}

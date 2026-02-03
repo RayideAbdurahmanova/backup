@@ -1,0 +1,30 @@
+{
+    "common": {
+        "location_permission": "Location Permission",
+        "location_permission_message": "This app needs access to your location to display accurate prayer times.",
+        "ask_later": "Ask Later",
+        "cancel": "Cancel",
+        "ok": "OK",
+        "error": "Error",
+        "location_denied": "Location Permission Denied",
+        "location_denied_message": "Prayer times will be shown based on approximate location.",
+        "location_error": "Could not determine location."
+    },
+    "prayer_times": {
+        "fajr": "Fajr",
+        "sunrise": "Sunrise",
+        "dhuhr": "Dhuhr",
+        "asr": "Asr",
+        "maghrib": "Maghrib",
+        "isha": "Isha"
+    },
+    "date": {
+        "ramadan": "Ramadan",
+        "hijri": "Hijri"
+    },
+    "tabs": {
+        "azan_times": "Prayer Times",
+        "iftar_time": "Iftar Time",
+        "notifications": "Notifications"
+    }
+}

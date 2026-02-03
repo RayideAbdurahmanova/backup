@@ -77,43 +77,50 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.ramadan"
+    namespace "com.iftaraz"
     defaultConfig {
-        applicationId "com.ramadan"
+        applicationId "com.iftaraz"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
     }
+    
+    // Increase AAPT2 timeout to prevent daemon timeout errors
+    androidResources {
+        ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+    }
+    
     signingConfigs {
-        debug {
-            storeFile file('debug.keystore')
-            storePassword 'android'
-            keyAlias 'androiddebugkey'
-            keyPassword 'android'
+    release {
+        storeFile file(UPLOAD_STORE_FILE)
+        storePassword UPLOAD_STORE_PASSWORD
+        keyAlias UPLOAD_KEY_ALIAS
+        keyPassword UPLOAD_KEY_PASSWORD
         }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
-        }
+    }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
-            minifyEnabled enableProguardInReleaseBuilds
+            signingConfig signingConfigs.release
+            minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
-    }
 }
 
-dependencies {
-    // The version of react-native is set by the React Native Gradle Plugin
-    implementation("com.facebook.react:react-android")
-
-    if (hermesEnabled.toBoolean()) {
-        implementation("com.facebook.react:hermes-android")
-    } else {
-        implementation jscFlavor
-    }
 }
+
+    dependencies {
+        implementation("com.facebook.react:react-android")
+
+        
+        implementation "com.google.android.gms:play-services-location:21.0.1"
+
+        if (hermesEnabled.toBoolean()) {
+            implementation("com.facebook.react:hermes-android")
+        } else {
+            implementation jscFlavor
+        }
+    }

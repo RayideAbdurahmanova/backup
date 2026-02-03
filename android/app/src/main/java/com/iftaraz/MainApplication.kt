@@ -1,4 +1,4 @@
-package com.ramadan
+package com.iftaraz
 
 import android.app.Application
 import com.facebook.react.PackageList
