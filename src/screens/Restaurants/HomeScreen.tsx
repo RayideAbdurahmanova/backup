@@ -205,6 +205,7 @@ const HomeScreen = () => {
             </View>
 
             {/* Overlapping Scrollable Content */}
+            <View style={styles.fixedTopSpacer} />
             <ScrollView
                 style={styles.scrollableContent}
                 showsVerticalScrollIndicator={false}
@@ -305,9 +306,14 @@ const styles = StyleSheet.create({
         width: '100%',
         overflow: 'hidden',
     },
+    fixedTopSpacer: {
+        height: 25,              // istədiyin ağ boşluq hündürlüyü
+        backgroundColor: COLORS.background,
+    },
+
     scrollableContent: {
         flex: 1,
-        marginTop: -25, // Overlap the map by 5px
+        marginTop: -25,
         backgroundColor: COLORS.background,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -369,9 +375,8 @@ const styles = StyleSheet.create({
     },
     restaurantCard: {
         width: 110,
-        height: 80,
-        // backgroundColor: '#FFF',
-        borderRadius: 12,
+        height: 90,
+        backgroundColor: '#0000',
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 12,
@@ -379,7 +384,8 @@ const styles = StyleSheet.create({
 
     restaurantLogo: {
         width: 110,
-        height: 80,
+        height: 90,
+        borderRadius: 20,
     },
 
     section: {

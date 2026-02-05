@@ -71,8 +71,8 @@ const styles = StyleSheet.create({
     },
 
     image: {
-        width: 400,
-        height: 400,
+        width: 300,
+        height: 300,
         marginBottom: 24, 
     },
 
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
 
     button: {
         width: '100%',        
-        backgroundColor: COLORS.primary,
+        backgroundColor: "#40643a",
         paddingVertical: 16,
         borderRadius: 28,
         alignItems: 'center',

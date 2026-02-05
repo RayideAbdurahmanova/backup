@@ -251,7 +251,7 @@ const RestaurantDetailScreen: React.FC = () => {
                 backgroundColor="transparent"
                 translucent={Platform.OS === 'android'}
             />
-
+            <View style={styles.fixedTopSpacer} />
             <ScrollView
                 style={styles.scrollView}
                 showsVerticalScrollIndicator={false}
@@ -337,6 +337,10 @@ const RestaurantDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: COLORS.background,
+    },
+    fixedTopSpacer: {
+        height: 25,
         backgroundColor: COLORS.background,
     },
     scrollView: {

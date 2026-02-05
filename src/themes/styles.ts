@@ -8,5 +8,6 @@ export const COLORS = {
 export const FONTS = {
     PoppinsRegular: 'Poppins-Regular',
     PoppinsSemiBold: 'Poppins-SemiBold',
-    PoppinsBold: 'Poppins-Bold'
+    PoppinsBold: 'Poppins-Bold',
+    InterExtraBold: 'Inter-ExtraBold',
 }

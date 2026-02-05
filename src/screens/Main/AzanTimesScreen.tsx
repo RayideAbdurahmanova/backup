@@ -265,15 +265,15 @@ const AzanTimesScreen: React.FC = () => {
                         <Text style={styles.dayText}>01</Text>
                         <SvgImage
                             source={require('../../assets/svg/mainPage/mosque.svg')}
-                            width={35}
-                            height={35}
+                            width={40}
+                            height={40}
                             fill={COLORS.text}
                         />
                     </View>
                 </View>
 
                 <RemainingTime />
-                <View style={{ marginBottom: 12, paddingLeft: 20, }}>
+                <View style={{ paddingLeft: 20, marginTop: 15 }}>
                     <Text style={styles.sahurTimeText}>Sahur Vaxtı</Text>
                 </View>
 
@@ -297,7 +297,7 @@ const AzanTimesScreen: React.FC = () => {
                     </View>
                 </View>
 
-                <View style={{ marginBottom: 12, paddingLeft: 20, marginTop: 12 }}>
+                <View style={{ paddingLeft: 20, marginTop: 25 }}>
                     <Text style={styles.sahurTimeText}>İftar Vaxtı</Text>
                 </View>
 
@@ -321,7 +321,10 @@ const AzanTimesScreen: React.FC = () => {
                     </View>
                 </View>
                 {/* Be guest  */}
-                <View style={styles.beGuestContainer}>
+                <TouchableOpacity
+                    onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_HOME)}
+                    style={styles.beGuestContainer}
+                >
                     {/* SVG arxa fon */}
                     <View style={styles.imageWrapper}>
                         <Image
@@ -340,7 +343,7 @@ const AzanTimesScreen: React.FC = () => {
                             <Text style={styles.tanisOlText}>Tanış ol</Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </TouchableOpacity>
 
                 <View style={styles.todaysPrayWrapper}>
                     {/* KART */}
@@ -445,16 +448,14 @@ const styles = StyleSheet.create({
     dateTime: {
         color: COLORS.text,
         fontSize: 18,
-        fontWeight: '700',
         marginTop: 4,
-        fontFamily: FONTS.PoppinsSemiBold,
+        fontFamily: FONTS.InterExtraBold,
     },
     dayText: {
         color: COLORS.text,
         fontSize: 30,
-        fontWeight: '700',
-        marginRight: 6, // 01 ilə icon arası boşluq
-        fontFamily: FONTS.PoppinsSemiBold,
+        marginRight: 6, 
+        fontFamily: FONTS.InterExtraBold,
     },
     remainingTimeContainer: {
         marginTop: 16,
@@ -469,7 +470,7 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         fontSize: 16,
         fontWeight: '400',
-        marginBottom: 8,
+        marginBottom: 5,
         fontFamily: FONTS.PoppinsSemiBold,
     },
     timeRow: {
@@ -478,13 +479,13 @@ const styles = StyleSheet.create({
     },
     timeBig: {
         color: COLORS.primary,
-        fontSize: 36,
-        fontWeight: '700',
+        fontSize: 40,
+        fontFamily: FONTS.InterExtraBold,
     },
     timeSmall: {
         color: COLORS.primary,
         fontSize: 24,
-        fontWeight: '600',
+        fontFamily: FONTS.InterExtraBold,
     },
     timeColon: {
         color: COLORS.primary,
@@ -498,7 +499,7 @@ const styles = StyleSheet.create({
     },
     sahurTimeText: {
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: '700',
         fontFamily: FONTS.PoppinsSemiBold,
     },
     timeBox: {
@@ -513,15 +514,17 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: '#fff',
+        fontFamily: FONTS.PoppinsBold,
     },
     colon: {
         fontSize: 28,
         fontWeight: 'bold',
+        fontFamily: FONTS.PoppinsBold,
         marginHorizontal: 8,
     },
     beGuestContainer: {
         position: 'relative',
-        marginTop: 24,
+        marginTop: 28,
         marginHorizontal: 20,
         width: '90%', // Explicit width
         alignSelf: 'center',
@@ -571,8 +574,8 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.PoppinsSemiBold,
     },
     todaysPrayWrapper: {
-        marginTop: 24,
-        marginHorizontal: 20,
+        marginTop: 28,
+        marginHorizontal: 25,
         height: 200,
         position: 'relative',
     },

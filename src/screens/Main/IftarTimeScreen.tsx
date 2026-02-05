@@ -109,7 +109,11 @@ const IftarTimeScreen: React.FC = () => {
                             <Text style={styles.label}>Vaxtın çıxmasına:</Text>
 
                             <View style={styles.timeRow}>
-                                <View style={styles.clockIcon} />
+                                <SvgImage
+                                    source={require('../../assets/svg/firstPage/clockBlack.svg')}
+                                    width={18}
+                                    height={18}
+                                />
                                 <Text style={styles.time}>06 : 24 : 05</Text>
                             </View>
                         </View>
@@ -117,7 +121,7 @@ const IftarTimeScreen: React.FC = () => {
 
                     <View style={styles.right}>
                         <Image
-                            source={require('../../assets/images/mosqueBig.png')}
+                            source={require('../../assets/images/mosqueBigDark.png')}
                             style={styles.mosqueImage}
                             resizeMode='contain'
                         />
@@ -207,20 +211,33 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: '#DDE3D7',
         borderRadius: 18,
-        padding: 20,
-        paddingRight: 0,   // 🔴 VACİB
+        paddingTop: 10,
+        paddingRight: 0,   
         flexDirection: 'row',
-        position: 'relative',
-        minHeight: 180,
-        overflow: 'hidden',
+        // position: 'relative',
+        // minHeight: 180,
+        // overflow: 'hidden',
     },
     left: {
-        maxWidth: '55%', // 🔴 ŞƏKİL ÜÇÜN YER AÇIR
-        zIndex: 2,
+        maxWidth: '55%', 
+        // zIndex: 2,
+        paddingLeft: 5,
     },
     right: {
-        // justifyContent: 'flex-end',
-        // alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        alignItems: 'flex-end',
+        // borderWidth:1,
+        // borderColor:'#00000010',
+        paddingHorizontal:0,
+        paddingVertical:0,
+    },
+    mosqueImage: {
+        // position: 'absolute',
+        // right: -25,
+        // bottom: -15,
+        width: 250,
+        height: 180,   
+        // zIndex: 1,
     },
     city: {
         fontSize: 16,
@@ -248,20 +265,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 6,
     },
-    clockIcon: {
-        width: 18,
-        height: 18,
-        borderRadius: 9,
-        backgroundColor: '#1E1E1E',
-        marginRight: 8,
-    },
     time: {
         fontSize: 16,
         fontWeight: '600',
         color: '#1E1E1E',
+        marginLeft: 8,
     },
     item: {
-        marginHorizontal: 7,
+        marginHorizontal: 12,
         alignItems: 'center',
     },
     name: {
@@ -277,14 +288,6 @@ const styles = StyleSheet.create({
     activeText: {
         color: '#D2691E',
         fontWeight: '700',
-    },
-    mosqueImage: {
-        position: 'absolute',
-        right: -25,
-        bottom: -15,
-        width: '70%',
-        height: '80%',   // 🔴 əsas böyümə burdadır
-        zIndex: 1,
     },
     remainingTimeWrapper: {
         marginTop: 24,
