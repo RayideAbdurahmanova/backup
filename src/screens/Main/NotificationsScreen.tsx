@@ -4,7 +4,6 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    SafeAreaView,
     Platform,
     Switch,
     FlatList,
@@ -26,6 +25,7 @@ import { COLORS, FONTS } from '../../themes/styles';
 import { SvgImage } from '../../components/svgImages/SvgImages';
 import { RootStackParamList } from '../../navigation/types';
 import { CustomAlert } from '@/components/CustomAlert';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -158,52 +158,53 @@ const NotificationsScreen: React.FC = () => {
         buttons: [],
     });
 
-    useEffect(() => {
-        const init = async () => {
-            const hasPermission = await checkNotificationPermission();
-            setNotificationsEnabled(hasPermission);
-        };
-        init();
-    }, []);
+    // useEffect(() => {
+    //     const init = async () => {
+    //         const hasPermission = await checkNotificationPermission();
+    //         setNotificationsEnabled(hasPermission);
+    //     };
+    //     init();
+    // }, []);
 
     const handleToggleNotifications = async (value: boolean) => {
+        // Notification functionality is currently disabled
         // SWITCH OFF
-        if (!value) {
-            setNotificationsEnabled(false);
-            setAlertConfig({
-                visible: true,
-                title: 'Bildirişlər deaktiv edildi',
-                message: 'Tam söndürmək üçün telefon ayarlarına keçə bilərsiniz.',
-                buttons: [
-                    { text: 'Ləğv et', style: 'cancel' },
-                    { text: 'Ayarlar', onPress: () => openSettings(), style: 'default' },
-                ],
-            });
-            return;
-        }
+        // if (!value) {
+        //     setNotificationsEnabled(false);
+        //     setAlertConfig({
+        //         visible: true,
+        //         title: 'Bildirişlər deaktiv edildi',
+        //         message: 'Tam söndürmək üçün telefon ayarlarına keçə bilərsiniz.',
+        //         buttons: [
+        //             { text: 'Ləğv et', style: 'cancel' },
+        //             { text: 'Ayarlar', onPress: () => openSettings(), style: 'default' },
+        //         ],
+        //     });
+        //     return;
+        // }
 
-        // SWITCH ON
-        const hasPermission = await checkNotificationPermission();
-        if (hasPermission) {
-            setNotificationsEnabled(true);
-            return;
-        }
+        // // SWITCH ON
+        // const hasPermission = await checkNotificationPermission();
+        // if (hasPermission) {
+        //     setNotificationsEnabled(true);
+        //     return;
+        // }
 
-        const granted = await requestNotificationPermission();
-        if (granted) {
-            setNotificationsEnabled(true);
-        } else {
-            setAlertConfig({
-                visible: true,
-                title: 'İcazə verilmədi',
-                message: 'Bildiriş icazəsi olmadan xatırlatmalar işləməyəcək.',
-                buttons: [
-                    { text: 'Ləğv et', style: 'cancel' },
-                    { text: 'Ayarlar', onPress: () => openSettings(), style: 'default' },
-                ],
-            });
-            setNotificationsEnabled(false);
-        }
+        // const granted = await requestNotificationPermission();
+        // if (granted) {
+        //     setNotificationsEnabled(true);
+        // } else {
+        //     setAlertConfig({
+        //         visible: true,
+        //         title: 'İcazə verilmədi',
+        //         message: 'Bildiriş icazəsi olmadan xatırlatmalar işləməyəcək.',
+        //         buttons: [
+        //             { text: 'Ləğv et', style: 'cancel' },
+        //             { text: 'Ayarlar', onPress: () => openSettings(), style: 'default' },
+        //         ],
+        //     });
+        //     setNotificationsEnabled(false);
+        // }
     };
 
     const handleLogout = () => {

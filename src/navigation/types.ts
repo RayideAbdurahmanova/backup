@@ -1,4 +1,5 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
+import { AzanStackParamList } from './Router';
 
 // Root Stack Navigator Types
 export type RootStackParamList = {
@@ -9,14 +10,12 @@ export type RootStackParamList = {
     SoundSettings: undefined;
     LocationSettings: undefined;
     ContactScreen: undefined;
-    // Restaurants
-    RestaurantsHome: undefined;
 };
 
 // Bottom Tab Navigator Types
 export type MainTabParamList = {
     IftarTime: undefined;
-    AzanTimes: undefined;
+    AzanTimes: NavigatorScreenParams<AzanStackParamList>;
     Notifications: undefined;
 };
 

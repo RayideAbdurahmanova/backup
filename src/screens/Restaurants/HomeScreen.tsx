@@ -12,18 +12,22 @@ import {
     Platform,
     PermissionsAndroid,
     Alert,
+    SafeAreaView,
+    Dimensions,
 } from 'react-native';
 
 import MapView, { Region, Marker, UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../../navigation/types';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, FONTS } from '../../themes/styles';
 import { SvgImage } from '../../components/svgImages/SvgImages';
 import LocationIcon from '../../assets/svg/mainPage/location.svg';
+import LinearGradient from 'react-native-linear-gradient';
+import { ROUTES } from '@/navigation/routes';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
+import type { AzanStackParamList } from '../../navigation/Router';
 
+const { width, height } = Dimensions.get('window');
 
 
 const DEFAULT_REGION: Region = {
@@ -34,12 +38,12 @@ const DEFAULT_REGION: Region = {
 };
 const HomeScreen = () => {
     const insets = useSafeAreaInsets();
+    const navigation = useNavigation<NavigationProp<AzanStackParamList>>();
 
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    // const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const [region, setRegion] = useState<Region>(DEFAULT_REGION);
     const mapRef = useRef<MapView>(null);
-    const { t, i18n } = useTranslation();
     /* ---------------- Location ---------------- */
     const fetchCurrentLocation = useCallback(async () => {
         if (Platform.OS === 'android') {
@@ -107,27 +111,40 @@ const HomeScreen = () => {
         fetchCurrentLocation();
     }, [fetchCurrentLocation]);
 
-    const getCurrentDateI18n = () => {
-        const date = new Date();
 
-        if (i18n.language === 'az') {
-            const azMonths = [
-                'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
-                'iyul', 'avqust', 'sentyabr', 'oktyabr', 'noyabr', 'dekabr'
-            ];
-            const day = date.getDate();
-            const month = azMonths[date.getMonth()];
-            const year = date.getFullYear();
-            return `${day} ${month}, ${year}`;
-        }
+    const nearbyRestaurants = [
+        {
+            id: '1',
+            name: 'CafeCity',
+            logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNCMriGRaXiuV1UJLqzmll1FHPQOEPZnX1lA&s',
+        },
+        {
+            id: '2',
+            name: 'Borani',
+            logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2NWL4XcrVh-LdvBDt_zrbkYmDRkAd5p5CAw&s',
+        },
+        {
+            id: '3',
+            name: 'Şirvanşah',
+            logo: 'https://your-backend.com/images/sirvansah.png',
+        },
+    ];
 
-        return date.toLocaleDateString('en-US', {
-            timeZone: 'Asia/Baku',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        });
-    };
+
+    const popularMenus = [
+        {
+            id: '1',
+            restaurant: 'ABAKUZ Restoran',
+            price: '14.99',
+            image: 'https://img.freepik.com/free-photo/top-view-table-full-delicious-food-composition_23-2149141352.jpg',
+        },
+        {
+            id: '2',
+            restaurant: 'ABAKUZ Restoran',
+            price: '14.99',
+            image: 'https://img.freepik.com/free-photo/top-view-table-full-delicious-food-composition_23-2149141352.jpg',
+        },
+    ];
 
     return (
         <SafeAreaView style={styles.container}>
@@ -194,9 +211,86 @@ const HomeScreen = () => {
                 contentContainerStyle={styles.scrollContentContainer}
             >
 
+                {/* Promo Banner */}
+                <TouchableOpacity
+                    onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL)}
+                    style={styles.promoWrapper}
+                >
+                    <Image
+                        source={require('../../assets/images/steak.png')}
+                        style={styles.promoImage}
+                        resizeMode="contain"
+                    />
+
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL)}
+                        style={styles.promoButton}
+                    >
+                        <Text style={styles.promoButtonText}>Tanış ol</Text>
+                    </TouchableOpacity>
+                </TouchableOpacity>
+
+
+                {/* Nearby Restaurants */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Yaxınlıqdakı Restoranlar</Text>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        {nearbyRestaurants.map(item => (
+                            <TouchableOpacity
+                                key={item.id}
+                                style={styles.restaurantCard}
+                                onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL)}
+                            >
+                                <Image
+                                    source={{ uri: item.logo }}
+                                    style={styles.restaurantLogo}
+                                    resizeMode="cover"
+                                />
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
+
+                {/* Popular Restaurants */}
+                {/* Popular Iftar Menus */}
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>Populyar iftar Menyuları</Text>
+
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                        {popularMenus.map(item => (
+                            <TouchableOpacity
+                                onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL)}
+                                key={item.id}
+                                style={styles.menuCard}
+                                activeOpacity={0.9}>
+
+                                {/* Image */}
+                                <Image
+                                    source={{ uri: item.image }}
+                                    style={styles.menuImage}
+                                    resizeMode="cover"
+                                />
+
+                                {/* Gradient overlay */}
+                                <LinearGradient
+                                    colors={['transparent', 'rgba(0,0,0,0.7)']}
+                                    style={styles.menuGradient}
+                                />
+
+                                {/* Text content */}
+                                <View style={styles.menuInfo}>
+                                    <Text style={styles.restaurantName}>{item.restaurant}</Text>
+                                    <Text style={styles.menuPrice}>{item.price} AZN</Text>
+                                </View>
+
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
 
             </ScrollView>
-        </SafeAreaView>
+        </SafeAreaView >
 
     );
 };
@@ -222,6 +316,132 @@ const styles = StyleSheet.create({
     scrollContentContainer: {
         paddingBottom: 40,
     },
+    myLocationButton: {
+        position: 'absolute',
+        bottom: 40,
+        right: 14,
+        width: 42,
+        height: 42,
+        borderRadius: 21,
+        backgroundColor: '#FFF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOpacity: 0.2,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+    },
+    FileReader: {
+        marginBottom: 20,
+    },
+
+    promoWrapper: {
+        width: '94%',
+        height: 220,
+        borderRadius: 16,
+        overflow: 'hidden',
+        // backgroundColor: '#0000',
+        alignSelf: 'center',
+        marginHorizontal: 16,
+    },
+
+    promoImage: {
+        width: '100%',
+        height: "100%",
+    },
+
+    promoButton: {
+        position: 'absolute',
+        bottom: 23,
+        left: 25,
+        backgroundColor: COLORS.cardBackground,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 24,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+    },
+
+    promoButtonText: {
+        color: COLORS.text,
+        fontWeight: '600',
+    },
+    restaurantCard: {
+        width: 110,
+        height: 80,
+        // backgroundColor: '#FFF',
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginRight: 12,
+    },
+
+    restaurantLogo: {
+        width: 110,
+        height: 80,
+    },
+
+    section: {
+        marginTop: 28,
+        paddingLeft: 16,
+    },
+
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#2F3E2E',
+        marginBottom: 14,
+    },
+
+    menuCard: {
+        width: 260,
+        height: 170,
+        borderRadius: 16,
+        marginRight: 14,
+        overflow: 'hidden',
+        backgroundColor: '#EEE',
+    },
+
+    menuImage: {
+        width: '100%',
+        height: '100%',
+        position: 'absolute',
+    },
+
+    menuGradient: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 80,
+    },
+
+    menuInfo: {
+        position: 'absolute',
+        bottom: 12,
+        left: 12,
+        right: 12,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+
+    restaurantName: {
+        color: '#FFF',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+
+    menuPrice: {
+        color: '#FFF',
+        fontSize: 15,
+        fontWeight: '700',
+    },
+
+
+
+
 });
 
 export default HomeScreen;

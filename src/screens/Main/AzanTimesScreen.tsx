@@ -17,7 +17,8 @@ import Geolocation from '@react-native-community/geolocation';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
-import type { RootStackParamList } from '../../navigation/types';
+import type { AzanStackParamList } from '../../navigation/Router';
+import { ROUTES } from '../../navigation/routes';
 import { COLORS, FONTS } from '../../themes/styles';
 import { SvgImage } from '../../components/svgImages/SvgImages';
 import LocationIcon from '../../assets/svg/mainPage/location.svg';
@@ -34,7 +35,7 @@ const AzanTimesScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const mapRef = useRef<MapView>(null);
     const { t, i18n } = useTranslation();
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const navigation = useNavigation<NavigationProp<AzanStackParamList>>();
 
     const [region, setRegion] = useState<Region>(DEFAULT_REGION);
 
@@ -332,13 +333,9 @@ const AzanTimesScreen: React.FC = () => {
                     </View>
                     {/* Overlay content */}
                     <View style={styles.textOverlay}>
-                        <Text style={styles.beGuestText1}>İftara</Text>
-
-                        <Text style={styles.beGuestText2}>qonaq ol</Text>
-
                         <TouchableOpacity
                             style={styles.tanisOlButton}
-                            onPress={() => navigation.navigate('RestaurantsHome')}
+                            onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_HOME)}
                         >
                             <Text style={styles.tanisOlText}>Tanış ol</Text>
                         </TouchableOpacity>
@@ -541,7 +538,7 @@ const styles = StyleSheet.create({
     },
     textOverlay: {
         position: 'absolute',
-        bottom: 24,
+        bottom: 15,
         left: 20,
     },
     beGuestText1: {
@@ -560,10 +557,10 @@ const styles = StyleSheet.create({
 
     },
     tanisOlButton: {
-        marginTop: 12,
+        marginTop: 10,
         alignSelf: 'flex-start',
-        paddingHorizontal: 18,
-        paddingVertical: 8,
+        paddingHorizontal: 13,
+        paddingVertical: 4,
         backgroundColor: '#C1D9B0',
         borderRadius: 20,
     },

@@ -6,7 +6,6 @@ import { ActivityIndicator, View, StyleSheet } from 'react-native';
 import { RootStackParamList } from './types';
 import OnboardingScreen from '../screens/Onboarding/OnboardingScreen';
 import MainTabNavigator from './MainTabNavigator';
-import RestaurantsHomeScreen from '../screens/Restaurants/HomeScreen';
 import {
     ReminderSettingsScreen,
     SoundSettingsScreen,
@@ -55,7 +54,6 @@ const RootNavigator: React.FC = () => {
         >
             <Stack.Screen name="Onboarding" component={OnboardingScreen} />
             <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-            <Stack.Screen name="RestaurantsHome" component={RestaurantsHomeScreen} />
             <Stack.Screen name="ReminderSettings" component={ReminderSettingsScreen} />
             <Stack.Screen name="SoundSettings" component={SoundSettingsScreen} />
             <Stack.Screen name="LocationSettings" component={LocationSettingsScreen} />

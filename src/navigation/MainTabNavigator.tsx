@@ -5,8 +5,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MainTabParamList } from './types';
 import IftarTimeScreen from '../screens/Main/IftarTimeScreen';
-import AzanTimesScreen from '../screens/Main/AzanTimesScreen';
 import NotificationsScreen from '../screens/Main/NotificationsScreen';
+import { AzanStackNavigator } from './Router';
 import { SvgImage } from '../components/svgImages/SvgImages';
 import { COLORS } from '../themes/styles';
 
@@ -108,7 +108,7 @@ const MainTabNavigator: React.FC = () => {
             }}
         >
             <Tab.Screen name="IftarTime" component={IftarTimeScreen} />
-            <Tab.Screen name="AzanTimes" component={AzanTimesScreen} />
+            <Tab.Screen name="AzanTimes" component={AzanStackNavigator} />
             <Tab.Screen name="Notifications" component={NotificationsScreen} />
         </Tab.Navigator>
     );

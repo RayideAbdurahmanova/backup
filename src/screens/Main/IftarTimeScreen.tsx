@@ -117,7 +117,7 @@ const IftarTimeScreen: React.FC = () => {
 
                     <View style={styles.right}>
                         <Image
-                            source={require('../../assets/images/mosqueBigDark.png')}
+                            source={require('../../assets/images/mosqueBig.png')}
                             style={styles.mosqueImage}
                             resizeMode='contain'
                         />
