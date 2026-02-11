@@ -39,7 +39,7 @@ const RootNavigator: React.FC = () => {
     if (isLoading) {
         return (
             <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#6B4EFF" />
+                <ActivityIndicator size="large" color="#164A3A" />
             </View>
         );
     }

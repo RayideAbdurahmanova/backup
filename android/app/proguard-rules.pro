@@ -8,3 +8,15 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+# Google Maps
+-keep class com.google.android.gms.maps.** { *; }
+-keep class com.google.android.gms.common.** { *; }
+
+# React Native Maps
+-keep class com.airbnb.android.react.maps.** { *; }
+
+# Location services (optional but recommended)
+-keep class com.google.android.gms.location.** { *; }
+
+# Prevent stripping annotations
+-keepattributes *Annotation*

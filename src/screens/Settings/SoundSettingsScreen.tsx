@@ -10,7 +10,6 @@ import { COLORS, FONTS } from '../../themes/styles';
 import Slider from '@react-native-community/slider';
 import SystemSetting from 'react-native-system-setting';
 import { SettingsHeader } from '../../components/SettingsHeader';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 export const SoundSettingsScreen: React.FC = () => {
     const [volume, setVolume] = useState(0.5);
@@ -112,16 +111,16 @@ const styles = StyleSheet.create({
     },
     contentContainer: {
         padding: 16,
-        paddingTop: 24,
+        paddingTop: 15,
     },
     section: {
         borderRadius: 16,
-        padding: 24,
+        padding: 8,
         marginBottom: 16,
     },
     sectionTitle: {
-        fontSize: 14,
-        fontFamily: FONTS.PoppinsRegular,
+        fontSize: 16,
+        fontFamily: FONTS.PoppinsSemiBold,
         color: COLORS.text,
         marginBottom: 24,
     },
@@ -131,6 +130,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginBottom: 32,
         gap: 16,
+        marginTop:10
     },
     volumeIconContainer: {
         width: 60,
@@ -191,10 +191,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 4,
     },
     volumeLabel: {
-        fontSize: 12,
+        fontSize: 14,
         color: COLORS.text,
         opacity: 0.5,
-        fontFamily: FONTS.PoppinsMedium,
+        fontFamily: FONTS.PoppinsBold,
     },
     soundOptionsSection: {
         backgroundColor: COLORS.cardBackground,

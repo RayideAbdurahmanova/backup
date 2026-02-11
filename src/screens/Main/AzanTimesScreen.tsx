@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
     View,
     StyleSheet,
@@ -6,14 +6,12 @@ import {
     StatusBar,
     Platform,
     TouchableOpacity,
-    Alert,
-    PermissionsAndroid,
     Text,
     ScrollView,
     Image,
+    ActivityIndicator,
 } from 'react-native';
-import MapView, { Region, Marker, UrlTile, PROVIDER_GOOGLE } from 'react-native-maps';
-import Geolocation from '@react-native-community/geolocation';
+import MapView, { Region, Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
@@ -22,89 +20,125 @@ import { ROUTES } from '../../navigation/routes';
 import { COLORS, FONTS } from '../../themes/styles';
 import { SvgImage } from '../../components/svgImages/SvgImages';
 import LocationIcon from '../../assets/svg/mainPage/location.svg';
+import { apiService } from '../../api/services/apiService';
+import { useLocation } from '../../context/LocationContext';
 
 
-const DEFAULT_REGION: Region = {
-    latitude: 40.4093, // Bakı fallback
-    longitude: 49.8671,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
-};
+
+interface TodayContent {
+    duaText: string;
+    duaSource: string;
+}
+
+interface RamadanDay {
+    day: number;
+}
+
 
 const AzanTimesScreen: React.FC = () => {
     const insets = useSafeAreaInsets();
     const mapRef = useRef<MapView>(null);
     const { t, i18n } = useTranslation();
     const navigation = useNavigation<NavigationProp<AzanStackParamList>>();
+    const [todayContent, setTodayContent] = useState<TodayContent | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [ramadanDay, setRamadanDay] = useState<number | null>(null);
+    const [imsakTime, setImsakTime] = useState<string | null>(null);
+    const [iftarTime, setIftarTime] = useState<string | null>(null);
 
-    const [region, setRegion] = useState<Region>(DEFAULT_REGION);
 
-    /* ---------------- Location ---------------- */
-    const fetchCurrentLocation = useCallback(async () => {
-        if (Platform.OS === 'android') {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-            );
+    // Use shared location context
+    const { location, refreshLocation } = useLocation();
 
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                Alert.alert('Location', 'Location icazəsi verilmədi');
-                return;
-            }
+    // Helper function to convert time string to Date object
+    const toDate = (time: string, isTomorrow = false) => {
+        const [h, m, s] = time.split(':').map(Number);
+
+        const now = new Date();
+        const d = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+            h,
+            m,
+            s ?? 0,
+            0
+        );
+
+        if (isTomorrow) {
+            d.setDate(d.getDate() + 1);
         }
 
-        Geolocation.getCurrentPosition(
-            ({ coords }) => {
-                const newRegion = {
-                    latitude: coords.latitude,
-                    longitude: coords.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                };
+        return d;
+    };
 
-                setRegion(newRegion);
-                mapRef.current?.animateToRegion(newRegion, 1000);
-            },
-            (error) => {
-                console.log('High accuracy failed:', error.message);
+    // Calculate next target time (imsak or iftar) - memoized to prevent infinite loops
+    const nextTarget = useMemo(() => {
+        if (!imsakTime || !iftarTime) return null;
 
-                // 🔁 FALLBACK
-                Geolocation.getCurrentPosition(
-                    ({ coords }) => {
-                        const fallbackRegion = {
-                            latitude: coords.latitude,
-                            longitude: coords.longitude,
-                            latitudeDelta: 0.02,
-                            longitudeDelta: 0.02,
-                        };
+        const now = new Date();
+        const imsak = toDate(imsakTime);
+        const iftar = toDate(iftarTime);
 
-                        setRegion(fallbackRegion);
-                        mapRef.current?.animateToRegion(fallbackRegion, 1000);
-                    },
-                    (err) => {
-                        Alert.alert(
-                            'Məkan müəyyən edilə bilmədi',
-                            'Zəhmət olmasa GPS-i aktiv edin'
-                        );
-                    },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 20000,
-                        maximumAge: 30000,
-                    }
-                );
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 25000, // 👈 artırdıq
-                maximumAge: 0,
-            }
-        );
-    }, []);
+        if (now < iftar) {
+            return { label: 'İftara vaxtı', target: iftar };
+        }
 
+        // iftardan sonra → sabahın sahuru
+        return { label: 'Sahura vaxtı', target: toDate(imsakTime, true) };
+    }, [imsakTime, iftarTime]);
 
+    // Countdown state
+    const [countdown, setCountdown] = useState({ h: '00', m: '00', s: '00' });
+
+    // Update countdown every second
     useEffect(() => {
-        fetchCurrentLocation();
-    }, [fetchCurrentLocation]);
+        if (!nextTarget?.target) {
+            setCountdown({ h: '00', m: '00', s: '00' });
+            return;
+        }
+
+        const tick = () => {
+            const diff = nextTarget.target.getTime() - Date.now();
+
+            if (diff <= 0) {
+                setCountdown({ h: '00', m: '00', s: '00' });
+                return;
+            }
+
+            const total = Math.floor(diff / 1000);
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+
+            setCountdown({
+                h: String(h).padStart(2, '0'),
+                m: String(m).padStart(2, '0'),
+                s: String(s).padStart(2, '0'),
+            });
+        };
+
+        tick(); // Initial tick
+        const interval = setInterval(tick, 1000);
+        return () => clearInterval(interval);
+    }, [nextTarget]);
+
+
+    // Animate map when location changes
+    useEffect(() => {
+        if (!location || !mapRef.current) return;
+
+        mapRef.current.animateToRegion(
+            {
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+            },
+            1000
+        );
+    }, [location]);
+
 
     const getCurrentDateI18n = () => {
         const date = new Date();
@@ -128,83 +162,108 @@ const AzanTimesScreen: React.FC = () => {
         });
     };
 
-    const getRemainingToAzanTime = () => {
-        const now = new Date();
-        const endOfDay = new Date();
-
-        endOfDay.setHours(23, 59, 59, 999);
-
-        const diff = endOfDay.getTime() - now.getTime();
-
-        if (diff <= 0) {
-            return { h: '00', m: '00', s: '00' };
-        }
-
-        const totalSeconds = Math.floor(diff / 1000);
-        const h = Math.floor(totalSeconds / 3600);
-        const m = Math.floor((totalSeconds % 3600) / 60);
-        const s = totalSeconds % 60;
-
-        return {
-            h: String(h).padStart(2, '0'),
-            m: String(m).padStart(2, '0'),
-            s: String(s).padStart(2, '0'),
+    // fetch ramadan day
+    useEffect(() => {
+        const fetchRamadanDay = async () => {
+            try {
+                setLoading(true);
+                const response = await apiService.getRamadanDay();
+                console.log('Ramadan day response:', response);
+                setRamadanDay(response.day);
+            } catch (error) {
+                console.error('Error fetching Ramadan day:', error);
+            } finally {
+                setLoading(false);
+            }
         };
+
+        fetchRamadanDay();
+    }, []);
+
+
+    useEffect(() => {
+        if (!location) return;
+
+        const fetchPrayerTimes = async () => {
+            try {
+                const res = await apiService.getPrayerTimes({
+                    lat: location.latitude,
+                    lng: location.longitude,
+                    city: location.city,
+                    date: 'today',
+                    tz: 4,
+                    method: 'MWL',
+                });
+
+                setImsakTime(res.imsak);
+                setIftarTime(res.iftar);
+            } catch (e) {
+                console.log('Prayer time error', e);
+            }
+        };
+
+        fetchPrayerTimes();
+    }, [location]);
+
+    // Fetch today's content (ayah and dua)
+    useEffect(() => {
+        const fetchTodayContent = async () => {
+            try {
+                setLoading(true);
+                const response = await apiService.getTodaysContent();
+                setTodayContent({
+                    duaText: response.duaText,
+                    duaSource: response.duaSource,
+                });
+            } catch (error) {
+                console.error('Error fetching today\'s content:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTodayContent();
+    }, []);
+
+    const splitTime = (t?: string) => {
+        if (!t) return ['--', '--', '--'];
+        const parts = t.split(':');
+        return [
+            parts[0] ?? '--',
+            parts[1] ?? '--',
+            parts[2] ?? '--',
+        ];
     };
-
-    const useEndOfDayCountdown = () => {
-        const [time, setTime] = useState(getRemainingToAzanTime());
-
-        useEffect(() => {
-            const interval = setInterval(() => {
-                setTime(getRemainingToAzanTime());
-            }, 1000);
-
-            return () => clearInterval(interval);
-        }, []);
-
-        return time;
-    };
-
-    const RemainingTime = () => {
-        const { h, m, s } = useEndOfDayCountdown();
-
-        return (
-            <View style={styles.remainingTimeContainer}>
-                <Text style={styles.remainingTimeText}>Vaxtın çıxmasına</Text>
-                <View style={styles.timeRow}>
-                    <Text style={styles.timeBig}>{h}</Text>
-                    <Text style={styles.timeColon}>:</Text>
-                    <Text style={styles.timeBig}>{m}</Text>
-                    <Text style={styles.timeColon}>:</Text>
-                    <Text style={styles.timeSmall}>{s}</Text>
-                </View>
-            </View>
-        );
-    }
+    const [imsakH, imsakM, imsakS] = splitTime(imsakTime);
+    const [iftarH, iftarM, iftarS] = splitTime(iftarTime);
 
 
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar
-                barStyle="dark-content"
+                barStyle="light-content"
                 backgroundColor="transparent"
                 translucent={Platform.OS === 'android'}
             />
 
             {/* Map Section */}
             <View style={[styles.mapContainer, { paddingTop: insets.top }]}>
-                {region && (
+                {location && (
                     <MapView
                         provider={PROVIDER_GOOGLE}
                         ref={mapRef}
                         style={StyleSheet.absoluteFillObject}
-                        region={region}
+                        initialRegion={{
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
                         showsUserLocation={true}
                         showsMyLocationButton={false}
                         showsCompass={false}
-                        scrollEnabled={false}
-                        zoomEnabled={false}
+                        // scrollEnabled={false}
+                        // zoomEnabled={false}
                         rotateEnabled={false}
                         pitchEnabled={false}
                         toolbarEnabled={false}
@@ -214,13 +273,11 @@ const AzanTimesScreen: React.FC = () => {
                             right: 0,
                             bottom: 40,
                         }}
-                        onMapReady={() => console.log('✅ Map loaded successfully!')}
-                        onError={(e) => console.log('❌ Map Error:', e.nativeEvent)}
                     >
                         <Marker
                             coordinate={{
-                                latitude: region.latitude,
-                                longitude: region.longitude,
+                                latitude: location.latitude,
+                                longitude: location.longitude,
                             }}
                             title="Mənim yerləşməm"
                         />
@@ -230,7 +287,7 @@ const AzanTimesScreen: React.FC = () => {
                 {/* My Location */}
                 <TouchableOpacity
                     style={styles.myLocationButton}
-                    onPress={fetchCurrentLocation}
+                    onPress={refreshLocation}
                     activeOpacity={0.85}
                 >
                     <SvgImage
@@ -242,11 +299,19 @@ const AzanTimesScreen: React.FC = () => {
                 </TouchableOpacity>
             </View>
 
+            <View style={styles.mapSpacer} />
+
             {/* Overlapping Scrollable Content */}
             <ScrollView
-                style={styles.scrollableContent}
+                // style={styles.scrollableContent}
+                // showsVerticalScrollIndicator={false}
+                // contentContainerStyle={styles.scrollContentContainer}
+                style={styles.content}
+                contentContainerStyle={{
+                    // paddingHorizontal: 10,
+                    paddingBottom: insets.bottom + 25,
+                }}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContentContainer}
             >
                 {/* date and time  */}
                 <View style={styles.dateTimeContainer}>
@@ -262,7 +327,9 @@ const AzanTimesScreen: React.FC = () => {
 
                     {/* SAĞ TƏRƏF */}
                     <View style={styles.rightBlock}>
-                        <Text style={styles.dayText}>01</Text>
+                        <Text style={styles.dayText}>
+                            {ramadanDay ?? '--'}
+                        </Text>
                         <SvgImage
                             source={require('../../assets/svg/mainPage/mosque.svg')}
                             width={40}
@@ -272,7 +339,21 @@ const AzanTimesScreen: React.FC = () => {
                     </View>
                 </View>
 
-                <RemainingTime />
+                {/* <RemainingTime /> */}
+                <View style={styles.remainingTimeContainer}>
+                    <Text style={styles.remainingTimeText}>
+                        {nextTarget?.label ?? 'Vaxt hesablanır'}
+                    </Text>
+
+                    <View style={styles.timeRow}>
+                        <Text style={styles.timeBig}>{countdown.h}</Text>
+                        <Text style={styles.timeColon}>:</Text>
+                        <Text style={styles.timeBig}>{countdown.m}</Text>
+                        <Text style={styles.timeColon}>:</Text>
+                        <Text style={styles.timeSmall}>{countdown.s}</Text>
+                    </View>
+                </View>
+
                 <View style={{ paddingLeft: 20, marginTop: 15 }}>
                     <Text style={styles.sahurTimeText}>Sahur Vaxtı</Text>
                 </View>
@@ -280,43 +361,43 @@ const AzanTimesScreen: React.FC = () => {
                 <View style={styles.sahurTimeContainer}>
                     <View style={styles.timeRow}>
                         <View style={styles.timeBox}>
-                            <Text style={styles.timeNumber}>04</Text>
+                            <Text style={styles.timeNumber}>{imsakH}</Text>
                         </View>
 
                         <Text style={styles.colon}>:</Text>
 
                         <View style={styles.timeBox}>
-                            <Text style={styles.timeNumber}>32</Text>
+                            <Text style={styles.timeNumber}>{imsakM}</Text>
                         </View>
 
                         <Text style={styles.colon}>:</Text>
 
                         <View style={styles.timeBox}>
-                            <Text style={styles.timeNumber}>15</Text>
+                            <Text style={styles.timeNumber}>{imsakS}</Text>
                         </View>
                     </View>
                 </View>
 
-                <View style={{ paddingLeft: 20, marginTop: 25 }}>
+                <View style={{ paddingLeft: 20, marginTop: 30 }}>
                     <Text style={styles.sahurTimeText}>İftar Vaxtı</Text>
                 </View>
 
                 <View style={styles.sahurTimeContainer}>
                     <View style={styles.timeRow}>
                         <View style={styles.timeBox}>
-                            <Text style={styles.timeNumber}>05</Text>
+                            <Text style={styles.timeNumber}>{iftarH}</Text>
                         </View>
 
                         <Text style={styles.colon}>:</Text>
 
                         <View style={styles.timeBox}>
-                            <Text style={styles.timeNumber}>14</Text>
+                            <Text style={styles.timeNumber}>{iftarM}</Text>
                         </View>
 
                         <Text style={styles.colon}>:</Text>
 
                         <View style={styles.timeBox}>
-                            <Text style={styles.timeNumber}>13</Text>
+                            <Text style={styles.timeNumber}>{iftarS}</Text>
                         </View>
                     </View>
                 </View>
@@ -346,26 +427,28 @@ const AzanTimesScreen: React.FC = () => {
                 </TouchableOpacity>
 
                 <View style={styles.todaysPrayWrapper}>
-                    {/* KART */}
-                    <View style={styles.todaysPrayContainer}>
-                        <View style={styles.todaysPrayLeftContent}>
-                            <Text style={styles.todaysPrayText}>Bu günün duası</Text>
+                    {/* LEFT PART */}
+                    <View style={[styles.todaysPrayContainer, { paddingRight: 160 }]}>
+                        <Text style={styles.todaysPrayText}>Bugünün duası</Text>
 
-                            <Text style={styles.todaysPrayInfo}>
-                                Harada olursansa ol,{'\n'}
-                                Allah qarşısında{'\n'}
-                                məsuliyyətini unutma.{'\n'}
-                                Pisliyi yaxşılıqla yox et və{'\n'}
-                                insanlara gözəl əxlaqla yanaş.
-                            </Text>
-                        </View>
+                        {loading ? (
+                            <ActivityIndicator size="small" color={COLORS.primary} />
+                        ) : (
+                            <View style={styles.todaysPrayBottom}>
+                                <Text style={styles.todaysPrayInfo}>
+                                    {todayContent?.duaText ||
+                                        "Harada olursansa ol, Allah qarşısında məsuliyyətini unutma. Pisliyi yaxşılıqla yox et və insanlara gözəl əxlaqla yanaş."
+                                    }
+                                </Text>
+                            </View>
+                        )}
                     </View>
 
-                    {/* DALĞALI ŞƏKİL (ÜSTÜNDƏ) */}
+                    {/* RIGHT PART - IMAGE */}
                     <SvgImage
                         source={require('../../assets/svg/mainPage/todaysPray.svg')}
-                        width={150}
-                        height={150}
+                        width={180}
+                        height={180}
                         style={styles.todaysPrayImage}
                     />
                 </View>
@@ -393,9 +476,19 @@ const styles = StyleSheet.create({
         width: '100%',
         overflow: 'hidden',
     },
+    mapSpacer: {
+        height: 20,
+        backgroundColor: COLORS.background,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+    },
+    content: {
+        flex: 1,
+        padding: 15,
+    },
     scrollableContent: {
         flex: 1,
-        marginTop: -25, // Overlap the map by 5px
+        // marginTop: -25, // Overlap the map by 5px
         backgroundColor: COLORS.background,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -421,12 +514,12 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
     },
     dateTimeContainer: {
-        marginTop: 14,
+        // marginTop: 14,
         paddingHorizontal: 18,
         paddingVertical: 10,
         backgroundColor: COLORS.cardBackground,
         borderRadius: 12,
-        marginHorizontal: 20,
+        // marginHorizontal: 20,
         height: 80,
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -454,7 +547,7 @@ const styles = StyleSheet.create({
     dayText: {
         color: COLORS.text,
         fontSize: 30,
-        marginRight: 6, 
+        marginRight: 6,
         fontFamily: FONTS.InterExtraBold,
     },
     remainingTimeContainer: {
@@ -525,8 +618,8 @@ const styles = StyleSheet.create({
     beGuestContainer: {
         position: 'relative',
         marginTop: 28,
-        marginHorizontal: 20,
-        width: '90%', // Explicit width
+        // marginHorizontal: 20,
+        width: '100%',
         alignSelf: 'center',
     },
     imageWrapper: {
@@ -573,22 +666,21 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontFamily: FONTS.PoppinsSemiBold,
     },
-    todaysPrayWrapper: {
-        marginTop: 28,
-        marginHorizontal: 25,
-        height: 200,
-        position: 'relative',
-    },
-    todaysPrayContainer: {
+todaysPrayWrapper: {
+        marginTop: 24,
+        // marginHorizontal: 5,
         backgroundColor: COLORS.cardBackground,
         borderRadius: 16,
-        height: '100%',
-        paddingTop: 20,
-        paddingLeft: 20,
-        paddingRight: 120,
+        position: 'relative',
+        // flexDirection: 'row',
+        // overflow: 'hidden',
     },
-    todaysPrayLeftContent: {
-        flex: 1,
+    todaysPrayContainer: {
+        // flex: 1,
+        padding: 20,
+        borderRadius: 16,
+        paddingRight: 160,
+        justifyContent: 'space-between',
     },
     todaysPrayText: {
         fontSize: 20,
@@ -596,18 +688,43 @@ const styles = StyleSheet.create({
         fontFamily: FONTS.PoppinsBold,
         color: '#2E3A2F',
     },
+    todaysPrayBottom: {
+        marginBottom: 0,
+    },
+    todaysPraySubtitle: {
+        fontSize: 14,
+        color: '#4A5A4E',
+        fontFamily: FONTS.PoppinsRegular,
+        marginBottom: 15,
+        marginTop: 10,
+    },
     todaysPrayInfo: {
-        marginTop: 12,
         fontSize: 14,
         lineHeight: 20,
         color: '#4A5A4E',
         fontFamily: FONTS.PoppinsRegular,
     },
+    todaysPrayRightContent: {
+        width: 120,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     todaysPrayImage: {
         position: 'absolute',
-        right: -10,
-        bottom: -10,
+        right: -25,
+        bottom: -30,
+        aspectRatio: 1,
+        zIndex: 1,
+        pointerEvents: 'none',
     },
+
+
+
+
+
+
+
+
 
 
 });

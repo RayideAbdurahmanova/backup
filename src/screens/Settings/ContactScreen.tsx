@@ -11,12 +11,25 @@ import {
     TouchableWithoutFeedback,
     StatusBar,
     Keyboard,
+    Linking
 } from 'react-native';
 import { COLORS, FONTS } from '../../themes/styles';
 import { SettingsHeader } from '../../components/SettingsHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SvgImage } from '../../components/svgImages/SvgImages';
 
 const ContactScreen: React.FC = () => {
+
+    const phoneCall = () => {
+        let phoneNumber = '';
+        if (Platform.OS === 'android') {
+            phoneNumber = 'tel:${+994501234567}';
+        } else {
+            phoneNumber = 'telprompt:${+994501234567}';
+        }
+        Linking.openURL(phoneNumber);
+    }
+
     return (
         <KeyboardAvoidingView
             style={styles.container}
@@ -36,49 +49,50 @@ const ContactScreen: React.FC = () => {
                     {/* Info Card */}
                     <View style={styles.infoBox}>
                         <Text style={styles.infoText}>
-                            Sualın və ya təklifin var? Bizə yaz
+                            Sualın və ya təklifin var?{'\n'}
+                            Bizimlə əlaqə saxlayın.
                         </Text>
                     </View>
 
-                    {/* Name */}
-                    <Text style={styles.label}>Adınız və soyadınız</Text>
-                    <TextInput
-                        placeholder="Əli Əliyev"
-                        placeholderTextColor={COLORS.text + '70'}
-                        style={styles.input}
-                    />
+                    <View style={[styles.phoneContainer, { marginTop: 40 }]}>
+                        <SvgImage
+                            source={require('../../assets/svg/thirdPage/phone.svg')}
+                            width={20}
+                            height={20}
+                        // color="#ff4444"
+                        />
+                        <TouchableOpacity
+                            onPress={phoneCall}
+                        >
+                            <Text style={styles.phoneText}>+994 (50) 123 45 67</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                    {/* Email */}
-                    <Text style={styles.label}>Elektron poçt ünvanınız</Text>
-                    <TextInput
-                        placeholder="info@ifra.az"
-                        placeholderTextColor={COLORS.text + '70'}
-                        style={styles.input}
-                        keyboardType="email-address"
-                    />
+                    <View style={styles.phoneContainer}>
+                        <SvgImage
+                            source={require('../../assets/svg/thirdPage/email.svg')}
+                            width={20}
+                            height={20}
+                        // color="#ff4444"
+                        />
+                        <TouchableOpacity
+                            onPress={() => Linking.openURL('mailto:info@iftar.az')}
+                        >
+                            <Text style={styles.phoneText}>info@iftar.az</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                    {/* Phone */}
-                    <Text style={styles.label}>Telefon nömrəniz</Text>
-                    <TextInput
-                        placeholder="+994 (50) 123 45 67"
-                        placeholderTextColor={COLORS.text + '70'}
-                        style={styles.input}
-                        keyboardType="phone-pad"
-                    />
+                    <View style={styles.formContainer}>
+                        <Text style={styles.formText}>Əməkdaşlıq etmək üçün formu doldurun.</Text>
+                        <TouchableOpacity
+                            onPress={() => Linking.openURL('https://forms.gle/your-google-form-link')}
+                            style={{ marginTop: 16 }}
+                        >
+                            <Text style={styles.googleFormText}>Google Forms</Text>
+                        </TouchableOpacity>
+                    </View>
 
-                    {/* Message */}
-                    <Text style={styles.label}>Qeydiniz</Text>
-                    <TextInput
-                        placeholder="Sizinlə əməkdaşlıq etməyə hazıram..."
-                        placeholderTextColor={COLORS.text + '70'}
-                        style={[styles.input, styles.textArea]}
-                        multiline
-                    />
 
-                    {/* Send Button */}
-                    <TouchableOpacity style={styles.sendButton}>
-                        <Text style={styles.sendButtonText}>Göndər</Text>
-                    </TouchableOpacity>
                 </ScrollView>
             </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
@@ -92,14 +106,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: COLORS.background,
-        paddingTop: StatusBar.currentHeight || 0,
+        paddingTop: 20,
     },
     scrollContentContainer: {
         flexGrow: 1,
         justifyContent: 'flex-start',
         paddingBottom: 0,
         paddingHorizontal: 16,
-        paddingTop: 24,
+        paddingTop: 20,
         backgroundColor: COLORS.background,
     },
     infoBox: {
@@ -114,40 +128,34 @@ const styles = StyleSheet.create({
         color: COLORS.text,
         opacity: 0.8,
     },
-
-    label: {
-        fontSize: 13,
+    phoneContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderWidth: 2,
+        borderColor: COLORS.primary,
+        borderRadius: 12,
+        marginBottom: 24,
+    },
+    phoneText: {
+        fontSize: 16,
         fontFamily: FONTS.PoppinsRegular,
         color: COLORS.text,
-        marginBottom: 6,
-        marginTop: 12,
+        marginLeft: 12,
     },
-
-    input: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 12,
-        paddingHorizontal: 14,
-        paddingVertical: 14,
+    formContainer: {
+        marginTop: 20,
+        marginBottom: 24,
+    },
+    formText: {
         fontSize: 14,
         fontFamily: FONTS.PoppinsRegular,
         color: COLORS.text,
     },
-
-    textArea: {
-        height: 120,
-        textAlignVertical: 'top',
-    },
-
-    sendButton: {
-        marginTop: 32,
-        backgroundColor: COLORS.primary,
-        paddingVertical: 16,
-        borderRadius: 16,
-        alignItems: 'center',
-    },
-    sendButtonText: {
-        color: "#FFFFFF",
-        fontSize: 16,
-        fontFamily: FONTS.PoppinsBold,
+    googleFormText: {
+        fontSize: 14,
+        fontFamily: FONTS.PoppinsRegular,
+        color: "#D2691E",
     },
 });

@@ -36,17 +36,18 @@ const ReminderSettingsScreen: React.FC = () => {
     const [modalType, setModalType] = useState<'before' | 'after'>('before');
     const [modalVisible, setModalVisible] = useState(false);
 
-    const toggleSwitch = (id: string) => {
-        setPrayerTimes(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, enabled: !item.enabled } : item
-            )
-        );
 
-        setSelectedId(id);
-        setModalType('before');
-        setModalVisible(true);
-    };
+    // const toggleSwitch = (id: string) => {
+    //     setPrayerTimes(prev =>
+    //         prev.map(item =>
+    //             item.id === id ? { ...item, enabled: !item.enabled } : item
+    //         )
+    //     );
+
+    //     setSelectedId(id);
+    //     setModalType('before');
+    //     setModalVisible(true);
+    // };
 
     const updateTime = (value: number) => {
         setPrayerTimes(prev =>
@@ -81,7 +82,21 @@ const ReminderSettingsScreen: React.FC = () => {
 
                             <Switch
                                 value={item.enabled}
-                                onValueChange={() => toggleSwitch(item.id)}
+                                onValueChange={(value) => {
+                                    // əvvəl state-i yenilə
+                                    setPrayerTimes(prev =>
+                                        prev.map(p =>
+                                            p.id === item.id ? { ...p, enabled: value } : p
+                                        )
+                                    );
+
+                                    // yalnız ON edəndə modal açılsın
+                                    if (value) {
+                                        setSelectedId(item.id);
+                                        setModalType('before');
+                                        setModalVisible(true);
+                                    }
+                                }}
                                 trackColor={{ false: '#777', true: COLORS.primary }}
                                 thumbColor="#fff"
                             />
@@ -168,7 +183,7 @@ const ReminderSettingsScreen: React.FC = () => {
                             style={styles.close}
                             onPress={() => setModalVisible(false)}
                         >
-                            <Text style={{ color: COLORS.primary }}>Bağla</Text>
+                            <Text style={styles.closeText}>Bağla</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -187,6 +202,7 @@ const styles = StyleSheet.create({
     },
     content: {
         padding: 16,
+        marginTop: 15,
     },
     card: {
         backgroundColor: COLORS.cardBackground,
@@ -217,7 +233,7 @@ const styles = StyleSheet.create({
     },
     actionText: {
         color: COLORS.primary,
-        fontSize: 13,
+        fontSize: 14,
     },
 
     /* MODAL */
@@ -238,13 +254,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: FONTS.PoppinsBold,
         color: COLORS.text,
+        marginBottom: 10,
     },
     counterRow: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         width: '100%',
-        marginVertical: 24,
+        marginVertical: 15,
+        paddingHorizontal: 30,
     },
     counter: {
         fontSize: 22,
@@ -252,6 +270,12 @@ const styles = StyleSheet.create({
         color: COLORS.text,
     },
     close: {
-        marginTop: 8,
+        // marginTop: 4,
+        padding: 10,
+    },
+    closeText: {
+        color: COLORS.text,
+        fontSize: 16,
+        fontFamily: FONTS.PoppinsRegular,
     },
 });

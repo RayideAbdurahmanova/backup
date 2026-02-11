@@ -26,6 +26,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { ROUTES } from '@/navigation/routes';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import type { AzanStackParamList } from '../../navigation/Router';
+import { apiService, getRestaurantNearbyResponse } from '../../api/services/apiService';
+import { useLocation } from '@/context/LocationContext';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -40,95 +43,66 @@ const HomeScreen = () => {
     const insets = useSafeAreaInsets();
     const navigation = useNavigation<NavigationProp<AzanStackParamList>>();
 
+    const [nearbyRestaurants, setNearbyRestaurants] = useState<getRestaurantNearbyResponse[]>([]);
+    const [restaurantsLoading, setRestaurantsLoading] = useState(false);
+
+    const { location, refreshLocation } = useLocation();
+
+
     // const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const [region, setRegion] = useState<Region>(DEFAULT_REGION);
     const mapRef = useRef<MapView>(null);
-    /* ---------------- Location ---------------- */
-    const fetchCurrentLocation = useCallback(async () => {
-        if (Platform.OS === 'android') {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-            );
 
-            if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-                Alert.alert('Location', 'Location icazəsi verilmədi');
-                return;
-            }
-        }
+    // Animate map when location changes
+    useEffect(() => {
+        if (!location || !mapRef.current) return;
 
-        Geolocation.getCurrentPosition(
-            ({ coords }) => {
-                const newRegion = {
-                    latitude: coords.latitude,
-                    longitude: coords.longitude,
-                    latitudeDelta: 0.01,
-                    longitudeDelta: 0.01,
-                };
-
-                setRegion(newRegion);
-                mapRef.current?.animateToRegion(newRegion, 1000);
-            },
-            (error) => {
-                console.log('High accuracy failed:', error.message);
-
-                // 🔁 FALLBACK
-                Geolocation.getCurrentPosition(
-                    ({ coords }) => {
-                        const fallbackRegion = {
-                            latitude: coords.latitude,
-                            longitude: coords.longitude,
-                            latitudeDelta: 0.02,
-                            longitudeDelta: 0.02,
-                        };
-
-                        setRegion(fallbackRegion);
-                        mapRef.current?.animateToRegion(fallbackRegion, 1000);
-                    },
-                    (err) => {
-                        Alert.alert(
-                            'Məkan müəyyən edilə bilmədi',
-                            'Zəhmət olmasa GPS-i aktiv edin'
-                        );
-                    },
-                    {
-                        enableHighAccuracy: false,
-                        timeout: 20000,
-                        maximumAge: 30000,
-                    }
-                );
-            },
+        mapRef.current.animateToRegion(
             {
-                enableHighAccuracy: true,
-                timeout: 25000, // 👈 artırdıq
-                maximumAge: 0,
-            }
+                latitude: location.latitude,
+                longitude: location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+            },
+            1000
         );
-    }, []);
+    }, [location]);
 
+
+
+    const fetchNearbyRestaurants = async (
+        latitude: number,
+        longitude: number
+    ) => {
+        try {
+            setRestaurantsLoading(true);
+
+            const res = await apiService.getRestaurantNearby(
+                latitude,
+                longitude,
+                10
+            );
+            setNearbyRestaurants(res);
+        } catch (e) {
+            console.log('❌ Nearby Restaurants Error:', e);
+        } finally {
+            setRestaurantsLoading(false);
+        }
+    }
 
     useEffect(() => {
-        fetchCurrentLocation();
-    }, [fetchCurrentLocation]);
+        if (location?.latitude && location?.longitude) {
+            fetchNearbyRestaurants(location.latitude, location.longitude);
+        }
+    }, [location]);
 
-
-    const nearbyRestaurants = [
-        {
-            id: '1',
-            name: 'CafeCity',
-            logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNCMriGRaXiuV1UJLqzmll1FHPQOEPZnX1lA&s',
-        },
-        {
-            id: '2',
-            name: 'Borani',
-            logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2NWL4XcrVh-LdvBDt_zrbkYmDRkAd5p5CAw&s',
-        },
-        {
-            id: '3',
-            name: 'Şirvanşah',
-            logo: 'https://your-backend.com/images/sirvansah.png',
-        },
-    ];
+    const getImageSource = (url) => {
+        if (url && url.startsWith('http')) {
+            return { uri: url };
+        }
+        return require('../../assets/images/restaurant_placeholder.png');
+    };
 
 
     const popularMenus = [
@@ -156,17 +130,22 @@ const HomeScreen = () => {
 
             {/* Map Section */}
             <View style={[styles.mapContainer, { paddingTop: insets.top }]}>
-                {region && (
+                {location && (
                     <MapView
                         provider={PROVIDER_GOOGLE}
                         ref={mapRef}
                         style={StyleSheet.absoluteFillObject}
-                        region={region}
+                        initialRegion={{
+                            latitude: location.latitude,
+                            longitude: location.longitude,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
                         showsUserLocation={true}
                         showsMyLocationButton={false}
                         showsCompass={false}
-                        scrollEnabled={false}
-                        zoomEnabled={false}
+                        // scrollEnabled={false}
+                        // zoomEnabled={false}
                         rotateEnabled={false}
                         pitchEnabled={false}
                         toolbarEnabled={false}
@@ -181,18 +160,36 @@ const HomeScreen = () => {
                     >
                         <Marker
                             coordinate={{
-                                latitude: region.latitude,
-                                longitude: region.longitude,
+                                latitude: location.latitude,
+                                longitude: location.longitude,
                             }}
                             title="Mənim yerləşməm"
                         />
+                        {nearbyRestaurants.map((restaurant) => (
+                            <Marker
+                                key={restaurant.id}
+                                coordinate={{
+                                    latitude: restaurant.latitude,
+                                    longitude: restaurant.longitude,
+                                }}
+                            >
+                                <View style={styles.markerWrapper}>
+                                    <Image
+                                        source={require('../../assets/images/restaurant_marker.png')}
+                                        style={styles.markerImage}
+                                        resizeMode="contain"
+                                    />
+                                </View>
+                            </Marker>
+                        ))}
+
                     </MapView>
                 )}
 
                 {/* My Location */}
                 <TouchableOpacity
                     style={styles.myLocationButton}
-                    onPress={fetchCurrentLocation}
+                    onPress={refreshLocation}
                     activeOpacity={0.85}
                 >
                     <SvgImage
@@ -205,7 +202,7 @@ const HomeScreen = () => {
             </View>
 
             {/* Overlapping Scrollable Content */}
-            <View style={styles.fixedTopSpacer} />
+            <View style={styles.mapSpacer} />
             <ScrollView
                 style={styles.scrollableContent}
                 showsVerticalScrollIndicator={false}
@@ -241,16 +238,28 @@ const HomeScreen = () => {
                             <TouchableOpacity
                                 key={item.id}
                                 style={styles.restaurantCard}
-                                onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL)}
+                                onPress={() =>
+                                    navigation.navigate(
+                                        ROUTES.AZAN_STACK.RESTAURANTS_DETAIL,
+                                        { id: item.id }
+                                    )
+                                }
                             >
                                 <Image
-                                    source={{ uri: item.logo }}
+                                    source={getImageSource(item.coverImageUrl)}
                                     style={styles.restaurantLogo}
                                     resizeMode="cover"
                                 />
                             </TouchableOpacity>
                         ))}
+
+                        {!restaurantsLoading && nearbyRestaurants.length === 0 && (
+                            <Text style={{ marginLeft: 16, color: '#999' }}>
+                                Yaxınlıqda restoran tapılmadı
+                            </Text>
+                        )}
                     </ScrollView>
+
                 </View>
 
                 {/* Popular Restaurants */}
@@ -261,14 +270,16 @@ const HomeScreen = () => {
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         {popularMenus.map(item => (
                             <TouchableOpacity
-                                onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL)}
+                                onPress={() => navigation.navigate(ROUTES.AZAN_STACK.RESTAURANTS_DETAIL, {
+                                    id: item.id
+                                })}
                                 key={item.id}
                                 style={styles.menuCard}
                                 activeOpacity={0.9}>
 
                                 {/* Image */}
                                 <Image
-                                    source={{ uri: item.image }}
+                                    source={getImageSource(item.image)}
                                     style={styles.menuImage}
                                     resizeMode="cover"
                                 />
@@ -306,14 +317,15 @@ const styles = StyleSheet.create({
         width: '100%',
         overflow: 'hidden',
     },
-    fixedTopSpacer: {
-        height: 25,              // istədiyin ağ boşluq hündürlüyü
+    mapSpacer: {
+        height: 20,
         backgroundColor: COLORS.background,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
     },
-
     scrollableContent: {
         flex: 1,
-        marginTop: -25,
+        // marginTop: -25,
         backgroundColor: COLORS.background,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -322,6 +334,22 @@ const styles = StyleSheet.create({
     scrollContentContainer: {
         paddingBottom: 40,
     },
+    markerWrapper: {
+        // backgroundColor: '#fff',
+        // padding: 6,
+        borderRadius: 20,
+        // elevation: 4,
+        // shadowColor: '#000',
+        // shadowOpacity: 0.25,
+        // shadowRadius: 4,
+        // shadowOffset: { width: 0, height: 2 },
+    },
+    markerImage: {
+        width: 32,
+        height: 32,
+        resizeMode: 'contain',
+    },
+
     myLocationButton: {
         position: 'absolute',
         bottom: 40,
@@ -385,7 +413,8 @@ const styles = StyleSheet.create({
     restaurantLogo: {
         width: 110,
         height: 90,
-        borderRadius: 20,
+        borderRadius: 17,
+        backgroundColor: COLORS.primary,
     },
 
     section: {

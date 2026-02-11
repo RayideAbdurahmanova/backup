@@ -168,12 +168,33 @@ const LocationSettingsScreen: React.FC = () => {
                     <TextInput
                         style={styles.searchInput}
                         placeholder="Şəhər axtar..."
+                        placeholderTextColor={COLORS.text + '80'}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
+
+                    {searchQuery.length > 0 && (
+                        <TouchableOpacity
+                            onPress={() => setSearchQuery('')}
+                            style={styles.clearButton}
+                            // activeOpacity={0.7}
+                        >
+                            <SvgImage
+                                source={require('../../assets/svg/thirdPage/cancel.svg')}
+                                width={21}
+                                height={21}
+                                // fill={COLORS.text}
+                            />
+                        </TouchableOpacity>
+                    )}
                 </View>
 
-                <ScrollView>
+
+                <ScrollView
+                    // style={{ flex: 1 }}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingTop: 20 }}
+                >
                     {filteredCities.map(city => (
                         <TouchableOpacity
                             key={city.id}
@@ -213,8 +234,14 @@ const LocationSettingsScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: COLORS.background },
-    content: { flex: 1, padding: 16 },
+    container: {
+        flex: 1,
+        backgroundColor: COLORS.background
+    },
+    content: {
+        flex: 1,
+        padding: 16
+    },
     notificationContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -223,9 +250,17 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         marginBottom: 20,
     },
-    textContainer: { flex: 1, marginRight: 12 },
-    title: { fontFamily: FONTS.PoppinsBold, fontSize: 16 },
-    description: { fontSize: 14 },
+    textContainer: {
+        flex: 1,
+        marginRight: 12
+    },
+    title: {
+        fontFamily: FONTS.PoppinsBold,
+        fontSize: 16
+    },
+    description: {
+        fontSize: 14
+    },
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -235,18 +270,35 @@ const styles = StyleSheet.create({
         height: 48,
         marginBottom: 20,
     },
-    searchInput: { flex: 1, marginLeft: 8 },
+    searchInput: {
+        flex: 1,
+        marginLeft: 8
+    },
+    clearButton: {
+        marginLeft: 8,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
     cityItem: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 12,
         borderRadius: 12,
         marginBottom: 10,
+        // marginTop: 5,
         borderWidth: 2,
         borderColor: 'transparent',
     },
-    cityItemSelected: { borderColor: COLORS.primary },
-    cityName: { fontFamily: FONTS.PoppinsBold },
+    cityItemSelected: {
+        borderColor: COLORS.primary
+    },
+    cityName: {
+        fontFamily: FONTS.PoppinsBold
+    },
     radioButton: {
         width: 24,
         height: 24,

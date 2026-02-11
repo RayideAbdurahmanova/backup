@@ -10,6 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { COLORS, FONTS } from '../themes/styles';
 import { SvgImage } from '../components/svgImages/SvgImages';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface SettingsHeaderProps {
     title: string;
@@ -21,6 +22,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
     onBackPress
 }) => {
     const navigation = useNavigation();
+    const insets = useSafeAreaInsets();
 
     const handleBackPress = () => {
         if (onBackPress) {
@@ -37,7 +39,9 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
                 backgroundColor="transparent"
                 translucent={Platform.OS === 'android' ? false : undefined}
             />
-            <View style={styles.header}>
+            <View
+                style={[styles.header, { paddingTop: insets.top  }]}
+            >
                 <TouchableOpacity
                     onPress={handleBackPress}
                     style={styles.backButton}
@@ -54,7 +58,7 @@ export const SettingsHeader: React.FC<SettingsHeaderProps> = ({
                     {title}
                 </Text>
                 <View style={styles.placeholder} />
-            </View>
+            </View >
         </>
     );
 };
@@ -72,12 +76,14 @@ const styles = StyleSheet.create({
         minHeight: 56,
     },
     backButton: {
-        padding: 8,
+        padding: 15,
         marginLeft: -8,
         justifyContent: 'center',
         alignItems: 'center',
         minWidth: 40,
         marginTop: -2,
+        // borderWidth: 1,
+        // borderColor: '#00000'
     },
     backText: {
         fontSize: 32,
@@ -86,12 +92,12 @@ const styles = StyleSheet.create({
         lineHeight: 32,
     },
     headerTitle: {
+        flex: 1,
+        paddingHorizontal: 8,
         fontSize: 18,
         fontFamily: FONTS.PoppinsBold,
         color: COLORS.text,
-        flex: 1,
-        // textAlign: 'center',
-        paddingHorizontal: 8,
+        pointerEvents: 'none',
     },
     placeholder: {
         width: 40,

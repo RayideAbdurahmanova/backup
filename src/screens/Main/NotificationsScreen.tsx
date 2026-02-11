@@ -25,7 +25,7 @@ import { COLORS, FONTS } from '../../themes/styles';
 import { SvgImage } from '../../components/svgImages/SvgImages';
 import { RootStackParamList } from '../../navigation/types';
 import { CustomAlert } from '@/components/CustomAlert';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -157,6 +157,8 @@ const NotificationsScreen: React.FC = () => {
         message: '',
         buttons: [],
     });
+        const insets = useSafeAreaInsets();
+    
 
     // useEffect(() => {
     //     const init = async () => {
@@ -245,7 +247,9 @@ const NotificationsScreen: React.FC = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container}
+            edges={['left']}
+        >
             <FlatList
                 data={SETTINGS_DATA}
                 keyExtractor={item => item.id}
@@ -256,7 +260,11 @@ const NotificationsScreen: React.FC = () => {
                         onToggle={handleToggleNotifications}
                     />
                 }
-                contentContainerStyle={{ padding: 15, paddingBottom: 40 }}
+                contentContainerStyle={{
+                    padding: 15, 
+                    // paddingBottom: 20,
+                    paddingTop: insets.top + 25,
+                }}
                 showsVerticalScrollIndicator={false}
             />
             <CustomAlert
@@ -299,8 +307,8 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.cardBackground,
         padding: 16,
         borderRadius: 12,
-        marginBottom: 12,
-        paddingBottom: 20,
+        marginBottom: 20,
+        paddingBottom: 10,
     },
     textContainer: {
         flex: 1,
@@ -330,7 +338,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.primary + '20',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
+        marginRight: 18,
     },
     settingTextContainer: {
         flex: 1,

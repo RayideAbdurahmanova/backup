@@ -106,6 +106,7 @@ const MainTabNavigator: React.FC = () => {
             screenOptions={{
                 headerShown: false,
             }}
+            initialRouteName="AzanTimes"
         >
             <Tab.Screen name="IftarTime" component={IftarTimeScreen} />
             <Tab.Screen name="AzanTimes" component={AzanStackNavigator} />
@@ -142,11 +143,11 @@ const styles = StyleSheet.create({
     },
     activeIconContainer: {
         backgroundColor: COLORS.background,
-        borderRadius: 28,
+        borderRadius: 40,
         borderColor: '#FDFCFA',
-        borderWidth: 4,
-        width: 60,
-        height: 60,
+        borderWidth: 8,
+        width: 80,
+        height: 80,
         position: 'absolute',
         top: -15,
         // shadowColor: '#000',
