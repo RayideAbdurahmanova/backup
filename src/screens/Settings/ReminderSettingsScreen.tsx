@@ -81,6 +81,20 @@ const ReminderSettingsScreen: React.FC = () => {
         }
     };
 
+    const updateTime = (value: number) => {
+        if (!selectedId) return;
+
+        setPrayerTimes(prev =>
+            prev.map(item => {
+                if (item.id !== selectedId) return item;
+
+                return modalType === 'before'
+                    ? { ...item, reminderBefore: value }
+                    : { ...item, reminderAfter: value };
+            })
+        );
+    };
+
 
     const loadSettings = async () => {
         const saved = await AsyncStorage.getItem('REMINDER_SETTINGS');
@@ -92,6 +106,7 @@ const ReminderSettingsScreen: React.FC = () => {
         }
     };
 
+
     useEffect(() => {
         if (prayerTimes.length > 0 && backendTimes) {
             scheduleNotifications();
@@ -101,24 +116,13 @@ const ReminderSettingsScreen: React.FC = () => {
 
 
     const scheduleNotifications = async () => {
+        await notifee.cancelAllNotifications();
 
         await notifee.createChannel({
             id: 'normal-reminder',
             name: 'Prayer Reminder',
             importance: AndroidImportance.HIGH,
         });
-
-        // burada backenddən gələn vaxtları istifadə etməlisən
-        // indi test üçün manual yazıram
-        // const prayerBackendTimes: any = {
-        //     iftar: '18:42',
-        //     imsak: '05:12',
-        //     gunes: '06:30',
-        //     zohr: '13:15',
-        //     asr: '16:04',
-        //     megrib: '18:42',
-        //     isa: '20:10',
-        // };
 
         if (!backendTimes) return;
 
@@ -132,96 +136,38 @@ const ReminderSettingsScreen: React.FC = () => {
             iftar: backendTimes.maghrib,
         };
 
-        const timeString = timeMap[prayer.id];
-
-
         for (const prayer of prayerTimes) {
             if (!prayer.enabled) continue;
-            await notifee.cancelNotification(`${prayer.id}-before`);
-            await notifee.cancelNotification(`${prayer.id}-after`);
 
-            const timeString = backendTimes?.[prayer.id];
+            const timeString = timeMap[prayer.id];
             if (!timeString) continue;
 
             const [hour, minute] = timeString.split(':').map(Number);
 
-            const baseDate = new Date();
-            baseDate.setHours(hour);
-            baseDate.setMinutes(minute);
-            baseDate.setSeconds(0);
-            if (baseDate.getTime() < Date.now()) {
-                baseDate.setDate(baseDate.getDate() + 1);
+            const date = new Date();
+            date.setHours(hour);
+            date.setMinutes(minute);
+            date.setSeconds(0);
+
+            if (date.getTime() < Date.now()) {
+                date.setDate(date.getDate() + 1);
             }
 
-            // ⏱ BEFORE
-            if (prayer.beforeEnabled) {
-                const beforeDate = new Date(
-                    baseDate.getTime() - prayer.reminderBefore * 60000
-                );
-
-                if (beforeDate.getTime() > Date.now()) {
-                    await notifee.createTriggerNotification(
-                        {
-                            id: `${prayer.id}-before`,
-                            title: prayer.title,
-                            body: `${prayer.reminderBefore} dəqiqə sonra ${prayer.title} namazıdır`,
-                            android: {
-                                channelId: 'normal-reminder',
-                            },
-                        },
-                        {
-                            type: TriggerType.TIMESTAMP,
-                            timestamp: beforeDate.getTime(),
-                        }
-                    );
+            await notifee.createTriggerNotification(
+                {
+                    id: `${prayer.id}`,
+                    title: prayer.title,
+                    body: 'Namaz vaxtıdır',
+                    android: {
+                        channelId: 'normal-reminder',
+                    },
+                },
+                {
+                    type: TriggerType.TIMESTAMP,
+                    timestamp: date.getTime(),
                 }
-            }
-
-            // ⏱ AFTER
-            if (prayer.afterEnabled) {
-                const afterDate = new Date(
-                    baseDate.getTime() + prayer.reminderAfter * 60000
-                );
-
-                if (afterDate.getTime() > Date.now()) {
-                    await notifee.createTriggerNotification(
-                        {
-                            id: `${prayer.id}-after`,
-                            title: prayer.title,
-                            body: `${prayer.reminderAfter} dəqiqə keçdi`,
-                            android: {
-                                channelId: 'normal-reminder',
-                            },
-                        },
-                        {
-                            type: TriggerType.TIMESTAMP,
-                            timestamp: afterDate.getTime(),
-                        }
-                    );
-                }
-            }
-        }
-    };
-
-    useEffect(() => {
-        if (prayerTimes.length > 0) {
-            AsyncStorage.setItem(
-                'REMINDER_SETTINGS',
-                JSON.stringify(prayerTimes)
             );
         }
-    }, [prayerTimes]);
-
-    const updateTime = (value: number) => {
-        setPrayerTimes(prev =>
-            prev.map(item => {
-                if (item.id !== selectedId) return item;
-
-                return modalType === 'before'
-                    ? { ...item, reminderBefore: value }
-                    : { ...item, reminderAfter: value };
-            })
-        );
     };
 
     const selectedPrayer = prayerTimes.find(p => p.id === selectedId);

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "539864952923",
-    "project_id": "iftaraz-b4e48",
-    "storage_bucket": "iftaraz-b4e48.firebasestorage.app"
+    "project_number": "989608610384",
+    "project_id": "iftaraz-68472",
+    "storage_bucket": "iftaraz-68472.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:539864952923:android:3d797170caf40ccc058f7e",
+        "mobilesdk_app_id": "1:989608610384:android:abfd20bdbf6ba4f5659f55",
         "android_client_info": {
           "package_name": "com.iftaraz"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAYJlvzeqkYLZ1xsNcxDOrGAyw7dqfHTsI"
+          "current_key": "AIzaSyAaC26iZSnw8jxq2KCxiWbcMtOgasyuAfk"
         }
       ],
       "services": {

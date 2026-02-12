@@ -84,8 +84,8 @@ android {
         applicationId "com.iftaraz"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.2"
+        versionCode 4
+        versionName "0.9.5"
     }
     
     // Increase AAPT2 timeout to prevent daemon timeout errors
