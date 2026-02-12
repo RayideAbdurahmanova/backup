@@ -18,7 +18,7 @@ import { SettingsHeader } from '../../components/SettingsHeader';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgImage } from '../../components/svgImages/SvgImages';
 
-const ContactScreen: React.FC = () => {
+const CollaborationScreen: React.FC = () => {
 
     const phoneCall = () => {
         let phoneNumber = '';
@@ -35,7 +35,7 @@ const ContactScreen: React.FC = () => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-            <SettingsHeader title="Əlaqə" />
+            <SettingsHeader title="Əməkdaşlıq" />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
                 <ScrollView
                     contentContainerStyle={styles.scrollContentContainer}
@@ -49,38 +49,15 @@ const ContactScreen: React.FC = () => {
                     {/* Info Card */}
                     <View style={styles.infoBox}>
                         <Text style={styles.infoText}>
-                            Sualın və ya təklifin var?{'\n'}
-                            Bizimlə əlaqə saxlayın.
+                            Bizimlə əməkdaşlıq edərək iftar menyunuzu daha çox insanla paylaşın.
                         </Text>
                     </View>
 
-                    <View style={[styles.phoneContainer, { marginTop: 40 }]}>
-                        <SvgImage
-                            source={require('../../assets/svg/thirdPage/phone.svg')}
-                            width={20}
-                            height={20}
-                        // color="#ff4444"
-                        />
-                        <TouchableOpacity
-                            onPress={phoneCall}
-                        >
-                            <Text style={styles.phoneText}>+994 (50) 123 45 67</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <View style={styles.phoneContainer}>
-                        <SvgImage
-                            source={require('../../assets/svg/thirdPage/email.svg')}
-                            width={20}
-                            height={20}
-                        // color="#ff4444"
-                        />
-                        <TouchableOpacity
-                            onPress={() => Linking.openURL('mailto:info@iftar.az')}
-                        >
-                            <Text style={styles.phoneText}>info@iftar.az</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity style={styles.phoneContainer}
+                        onPress={() => Linking.openURL('https://forms.gle/your-google-form-link')}
+                    >
+                        <Text style={styles.phoneText}>İftar menyunu paylaş</Text>
+                    </TouchableOpacity>
 
                 </ScrollView>
             </TouchableWithoutFeedback>
@@ -88,7 +65,7 @@ const ContactScreen: React.FC = () => {
     );
 };
 
-export default ContactScreen;
+export default CollaborationScreen;
 
 
 const styles = StyleSheet.create({
@@ -109,7 +86,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.cardBackground,
         borderRadius: 12,
         padding: 14,
-        marginBottom: 24,
+        // marginBottom: 24,
     },
     infoText: {
         fontSize: 14,
@@ -118,33 +95,17 @@ const styles = StyleSheet.create({
         opacity: 0.8,
     },
     phoneContainer: {
-        flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 12,
         paddingHorizontal: 16,
-        borderWidth: 2,
-        borderColor: COLORS.primary,
-        borderRadius: 12,
-        marginBottom: 24,
+        backgroundColor: COLORS.primary,
+        borderRadius: 35,
+        marginTop: 20,
     },
     phoneText: {
-        fontSize: 16,
-        fontFamily: FONTS.PoppinsRegular,
-        color: COLORS.text,
-        marginLeft: 12,
+        fontSize: 18,
+        fontFamily: FONTS.PoppinsSemiBold,
+        color: "#fff",
     },
-    formContainer: {
-        marginTop: 20,
-        marginBottom: 24,
-    },
-    formText: {
-        fontSize: 14,
-        fontFamily: FONTS.PoppinsRegular,
-        color: COLORS.text,
-    },
-    googleFormText: {
-        fontSize: 14,
-        fontFamily: FONTS.PoppinsRegular,
-        color: "#D2691E",
-    },
+
 });

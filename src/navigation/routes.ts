@@ -30,6 +30,7 @@ export const ROUTES = {
         SOUND_SETTINGS: 'SoundSettings',
         LOCATION_SETTINGS: 'LocationSettings',
         CONTACT_SCREEN: 'ContactScreen',
+        COLLABORATION_SCREEN: 'CollaborationScreen',
     },
 } as const;
 

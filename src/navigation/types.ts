@@ -10,6 +10,7 @@ export type RootStackParamList = {
     SoundSettings: undefined;
     LocationSettings: undefined;
     ContactScreen: undefined;
+    CollaborationScreen: undefined;
 };
 
 // Bottom Tab Navigator Types

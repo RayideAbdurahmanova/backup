@@ -4,7 +4,7 @@ import Geolocation from '@react-native-community/geolocation';
 import Geocoder from 'react-native-geocoding';
 
 // Initialize Geocoder
-Geocoder.init('AIzaSyDg0dLqAThlv9DEUz-LFdSvkokxD5_t9iA', { language: 'az' });
+Geocoder.init('AIzaSyCX3VaxIJb7LbLlXF6ggA8ES7KuEuMAV3w', { language: 'az' });
 
 interface LocationData {
     latitude: number;

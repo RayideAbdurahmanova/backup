@@ -81,7 +81,7 @@ const HomeScreen = () => {
             const res = await apiService.getRestaurantNearby(
                 latitude,
                 longitude,
-                10
+                60
             );
             setNearbyRestaurants(res);
         } catch (e) {
@@ -97,7 +97,7 @@ const HomeScreen = () => {
         }
     }, [location]);
 
-    const getImageSource = (url) => {
+    const getImageSource = (url: string) => {
         if (url && url.startsWith('http')) {
             return { uri: url };
         }

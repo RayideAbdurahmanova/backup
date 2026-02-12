@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,42 +12,205 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS, FONTS } from '../../themes/styles';
 import { SettingsHeader } from '../../components/SettingsHeader';
 import { SvgImage } from '@/components/svgImages/SvgImages';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import notifee, {
+    TriggerType,
+    AndroidImportance
+} from '@notifee/react-native';
+import { apiService } from '@/api/services/apiService';
+
+
 
 interface PrayerTime {
     id: string;
     title: string;
     enabled: boolean;
+    beforeEnabled: boolean;
+    afterEnabled: boolean;
     reminderBefore: number;
     reminderAfter: number;
 }
 
 const ReminderSettingsScreen: React.FC = () => {
-    const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([
-        { id: 'iftar', title: 'İftar', enabled: true, reminderBefore: 45, reminderAfter: 45 },
-        { id: 'imsak', title: 'İmsak', enabled: false, reminderBefore: 45, reminderAfter: 45 },
-        { id: 'gunes', title: 'Günəş', enabled: false, reminderBefore: 45, reminderAfter: 45 },
-        { id: 'zohr', title: 'Zöhr', enabled: false, reminderBefore: 45, reminderAfter: 45 },
-        { id: 'asr', title: 'Əsr', enabled: false, reminderBefore: 45, reminderAfter: 45 },
-        { id: 'megrib', title: 'Məğrib', enabled: false, reminderBefore: 45, reminderAfter: 45 },
-        { id: 'isa', title: 'İşa', enabled: false, reminderBefore: 45, reminderAfter: 45 },
-    ]);
+    // const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([
+    const [prayerTimes, setPrayerTimes] = useState<PrayerTime[]>([]);
+    const [backendTimes, setBackendTimes] = useState<any>(null);
+
+
+    const DEFAULT_PRAYERS: PrayerTime[] = [
+        { id: 'iftar', title: 'İftar', enabled: true, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+        { id: 'imsak', title: 'İmsak', enabled: false, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+        { id: 'gunes', title: 'Günəş', enabled: false, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+        { id: 'zohr', title: 'Zöhr', enabled: false, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+        { id: 'asr', title: 'Əsr', enabled: false, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+        { id: 'megrib', title: 'Məğrib', enabled: false, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+        { id: 'isa', title: 'İşa', enabled: false, beforeEnabled: true, afterEnabled: false, reminderBefore: 45, reminderAfter: 45 },
+    ];
 
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [modalType, setModalType] = useState<'before' | 'after'>('before');
     const [modalVisible, setModalVisible] = useState(false);
 
+    useEffect(() => {
+        loadSettings();
+    }, []);
 
-    // const toggleSwitch = (id: string) => {
-    //     setPrayerTimes(prev =>
-    //         prev.map(item =>
-    //             item.id === id ? { ...item, enabled: !item.enabled } : item
-    //         )
-    //     );
+    useEffect(() => {
+        notifee.requestPermission();
+    }, []);
 
-    //     setSelectedId(id);
-    //     setModalType('before');
-    //     setModalVisible(true);
-    // };
+    useEffect(() => {
+        fetchPrayerTimes();
+    }, []);
+
+
+    const fetchPrayerTimes = async () => {
+        try {
+            const response = await apiService.getPrayerTimes({
+                lat: 40.4093,
+                lng: 49.8671,
+                city: 'Baku',
+                date: new Date().toISOString().split('T')[0],
+                tz: 4,
+                method: '2',
+            });
+
+            setBackendTimes(response);
+        } catch (error) {
+            console.log('Prayer time error', error);
+        }
+    };
+
+
+    const loadSettings = async () => {
+        const saved = await AsyncStorage.getItem('REMINDER_SETTINGS');
+
+        if (saved) {
+            setPrayerTimes(JSON.parse(saved));
+        } else {
+            setPrayerTimes(DEFAULT_PRAYERS);
+        }
+    };
+
+    useEffect(() => {
+        if (prayerTimes.length > 0 && backendTimes) {
+            scheduleNotifications();
+        }
+    }, [prayerTimes, backendTimes]);
+
+
+
+    const scheduleNotifications = async () => {
+
+        await notifee.createChannel({
+            id: 'normal-reminder',
+            name: 'Prayer Reminder',
+            importance: AndroidImportance.HIGH,
+        });
+
+        // burada backenddən gələn vaxtları istifadə etməlisən
+        // indi test üçün manual yazıram
+        // const prayerBackendTimes: any = {
+        //     iftar: '18:42',
+        //     imsak: '05:12',
+        //     gunes: '06:30',
+        //     zohr: '13:15',
+        //     asr: '16:04',
+        //     megrib: '18:42',
+        //     isa: '20:10',
+        // };
+
+        if (!backendTimes) return;
+
+        const timeMap: any = {
+            imsak: backendTimes.imsak,
+            gunes: backendTimes.sunrise,
+            zohr: backendTimes.dhuhr,
+            asr: backendTimes.asr,
+            megrib: backendTimes.maghrib,
+            isa: backendTimes.isha,
+            iftar: backendTimes.maghrib,
+        };
+
+        const timeString = timeMap[prayer.id];
+
+
+        for (const prayer of prayerTimes) {
+            if (!prayer.enabled) continue;
+            await notifee.cancelNotification(`${prayer.id}-before`);
+            await notifee.cancelNotification(`${prayer.id}-after`);
+
+            const timeString = backendTimes?.[prayer.id];
+            if (!timeString) continue;
+
+            const [hour, minute] = timeString.split(':').map(Number);
+
+            const baseDate = new Date();
+            baseDate.setHours(hour);
+            baseDate.setMinutes(minute);
+            baseDate.setSeconds(0);
+            if (baseDate.getTime() < Date.now()) {
+                baseDate.setDate(baseDate.getDate() + 1);
+            }
+
+            // ⏱ BEFORE
+            if (prayer.beforeEnabled) {
+                const beforeDate = new Date(
+                    baseDate.getTime() - prayer.reminderBefore * 60000
+                );
+
+                if (beforeDate.getTime() > Date.now()) {
+                    await notifee.createTriggerNotification(
+                        {
+                            id: `${prayer.id}-before`,
+                            title: prayer.title,
+                            body: `${prayer.reminderBefore} dəqiqə sonra ${prayer.title} namazıdır`,
+                            android: {
+                                channelId: 'normal-reminder',
+                            },
+                        },
+                        {
+                            type: TriggerType.TIMESTAMP,
+                            timestamp: beforeDate.getTime(),
+                        }
+                    );
+                }
+            }
+
+            // ⏱ AFTER
+            if (prayer.afterEnabled) {
+                const afterDate = new Date(
+                    baseDate.getTime() + prayer.reminderAfter * 60000
+                );
+
+                if (afterDate.getTime() > Date.now()) {
+                    await notifee.createTriggerNotification(
+                        {
+                            id: `${prayer.id}-after`,
+                            title: prayer.title,
+                            body: `${prayer.reminderAfter} dəqiqə keçdi`,
+                            android: {
+                                channelId: 'normal-reminder',
+                            },
+                        },
+                        {
+                            type: TriggerType.TIMESTAMP,
+                            timestamp: afterDate.getTime(),
+                        }
+                    );
+                }
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (prayerTimes.length > 0) {
+            AsyncStorage.setItem(
+                'REMINDER_SETTINGS',
+                JSON.stringify(prayerTimes)
+            );
+        }
+    }, [prayerTimes]);
 
     const updateTime = (value: number) => {
         setPrayerTimes(prev =>
@@ -75,7 +238,9 @@ const ReminderSettingsScreen: React.FC = () => {
                                 <Text style={styles.title}>{item.title}</Text>
                                 {item.enabled && (
                                     <Text style={styles.sub}>
-                                        {item.reminderBefore} dəq əvvəl · {item.reminderAfter} dəq sonra
+                                        {item.beforeEnabled && `${item.reminderBefore} dəq əvvəl`}
+                                        {item.beforeEnabled && item.afterEnabled && ' · '}
+                                        {item.afterEnabled && `${item.reminderAfter} dəq sonra`}
                                     </Text>
                                 )}
                             </View>
@@ -103,26 +268,74 @@ const ReminderSettingsScreen: React.FC = () => {
                         </View>
 
                         {item.enabled && (
-                            <View style={styles.actions}>
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setSelectedId(item.id);
-                                        setModalType('before');
-                                        setModalVisible(true);
-                                    }}
-                                >
-                                    <Text style={styles.actionText}>Vaxtından əvvəl</Text>
-                                </TouchableOpacity>
+                            <View style={styles.configSection}>
+                                {/* Before Settings */}
+                                <View style={styles.configRow}>
+                                    <View style={styles.configLeft}>
+                                        <Switch
+                                            value={item.beforeEnabled}
+                                            onValueChange={(value) => {
+                                                setPrayerTimes(prev =>
+                                                    prev.map(p =>
+                                                        p.id === item.id ? { ...p, beforeEnabled: value } : p
+                                                    )
+                                                );
+                                            }}
+                                            trackColor={{ false: '#777', true: COLORS.primary }}
+                                            thumbColor="#fff"
+                                            style={styles.smallSwitch}
+                                        />
+                                        <Text style={[styles.configLabel, !item.beforeEnabled && styles.disabledLabel]}>
+                                            Vaxtından əvvəl
+                                        </Text>
+                                    </View>
+                                    {item.beforeEnabled && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setSelectedId(item.id);
+                                                setModalType('before');
+                                                setModalVisible(true);
+                                            }}
+                                            style={styles.timeButton}
+                                        >
+                                            <Text style={styles.timeButtonText}>{item.reminderBefore} dəq</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
 
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setSelectedId(item.id);
-                                        setModalType('after');
-                                        setModalVisible(true);
-                                    }}
-                                >
-                                    <Text style={styles.actionText}>Vaxtından sonra</Text>
-                                </TouchableOpacity>
+                                {/* After Settings */}
+                                <View style={styles.configRow}>
+                                    <View style={styles.configLeft}>
+                                        <Switch
+                                            value={item.afterEnabled}
+                                            onValueChange={(value) => {
+                                                setPrayerTimes(prev =>
+                                                    prev.map(p =>
+                                                        p.id === item.id ? { ...p, afterEnabled: value } : p
+                                                    )
+                                                );
+                                            }}
+                                            trackColor={{ false: '#777', true: COLORS.primary }}
+                                            thumbColor="#fff"
+                                            style={styles.smallSwitch}
+                                        />
+                                        <Text style={[styles.configLabel, !item.afterEnabled && styles.disabledLabel]}>
+                                            Vaxtından sonra
+                                        </Text>
+                                    </View>
+                                    {item.afterEnabled && (
+                                        <TouchableOpacity
+                                            onPress={() => {
+                                                setSelectedId(item.id);
+                                                setModalType('after');
+                                                setModalVisible(true);
+                                            }}
+                                            style={styles.timeButton}
+                                        >
+                                            <Text style={styles.timeButtonText}>{item.reminderAfter} dəq</Text>
+                                        </TouchableOpacity>
+                                    )}
+                                </View>
                             </View>
                         )}
                     </View>
@@ -194,7 +407,6 @@ const ReminderSettingsScreen: React.FC = () => {
 
 export default ReminderSettingsScreen;
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -234,6 +446,46 @@ const styles = StyleSheet.create({
     actionText: {
         color: COLORS.primary,
         fontSize: 14,
+    },
+    configSection: {
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: 'rgba(255,255,255,0.1)',
+    },
+    configRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 8,
+    },
+    configLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    smallSwitch: {
+        transform: [{ scaleX: 0.8 }, { scaleY: 0.8 }],
+        marginRight: 8,
+    },
+    configLabel: {
+        fontSize: 14,
+        color: COLORS.text,
+        fontFamily: FONTS.PoppinsRegular,
+    },
+    disabledLabel: {
+        opacity: 0.5,
+    },
+    timeButton: {
+        backgroundColor: COLORS.primary,
+        paddingHorizontal: 14,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    timeButtonText: {
+        color: '#fff',
+        fontSize: 13,
+        fontFamily: FONTS.PoppinsSemiBold,
     },
 
     /* MODAL */

@@ -66,6 +66,13 @@ const SETTINGS_DATA: SettingItem[] = [
         icon: require('../../assets/svg/thirdPage/contact.svg'),
         screen: 'ContactScreen',
     },
+    {
+        id: 'collaboration',
+        title: 'Əməkdaşlıq',
+        subtitle: 'Bizimlə əməkdaşlıq edin',
+        icon: require('../../assets/svg/thirdPage/partner.svg'),
+        screen: 'CollaborationScreen',
+    },
 ];
 
 // const checkNotificationPermission = async (): Promise<boolean> => {

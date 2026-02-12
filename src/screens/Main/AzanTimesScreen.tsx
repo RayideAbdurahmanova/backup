@@ -250,9 +250,10 @@ const AzanTimesScreen: React.FC = () => {
             <View style={[styles.mapContainer, { paddingTop: insets.top }]}>
                 {location && (
                     <MapView
-                        provider={PROVIDER_GOOGLE}
+                        provider="google"
                         ref={mapRef}
                         style={StyleSheet.absoluteFillObject}
+                        mapType="standard"
                         initialRegion={{
                             latitude: location.latitude,
                             longitude: location.longitude,
@@ -272,6 +273,9 @@ const AzanTimesScreen: React.FC = () => {
                             left: 0,
                             right: 0,
                             bottom: 40,
+                        }}
+                        onMapReady={() => {
+                            console.log("MAP READY ✅");
                         }}
                     >
                         <Marker
@@ -666,7 +670,7 @@ const styles = StyleSheet.create({
         fontWeight: '600',
         fontFamily: FONTS.PoppinsSemiBold,
     },
-todaysPrayWrapper: {
+    todaysPrayWrapper: {
         marginTop: 24,
         // marginHorizontal: 5,
         backgroundColor: COLORS.cardBackground,

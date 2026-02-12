@@ -11,6 +11,7 @@ import {
     SoundSettingsScreen,
     LocationSettingsScreen,
     ContactScreen,
+    CollaborationScreen,
 } from '../screens/Settings';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -58,6 +59,7 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen name="SoundSettings" component={SoundSettingsScreen} />
             <Stack.Screen name="LocationSettings" component={LocationSettingsScreen} />
             <Stack.Screen name="ContactScreen" component={ContactScreen} />
+            <Stack.Screen name="CollaborationScreen" component={CollaborationScreen} />
         </Stack.Navigator>
     );
 };
