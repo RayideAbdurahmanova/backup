@@ -8,6 +8,7 @@ import com.example.ramazan.location.dto.ResolvedCity;
 import com.example.ramazan.location.service.CityResolverService;
 import com.example.ramazan.prayer.dto.PrayerTimesResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.*;
@@ -15,6 +16,7 @@ import java.time.chrono.ChronoLocalDateTime;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PrayerService {
 
     private final CityResolverService cityResolverService;
@@ -62,7 +64,7 @@ public class PrayerService {
 
         ResolvedCity resolved = resolvedCity(lat, lng, city);
 
-        // bugünkü tarix
+
         LocalDate today = LocalDate.now(TimeConfig.zoneId);
 
         PrayerTimesDto calc = prayerCalculationService.calculate(

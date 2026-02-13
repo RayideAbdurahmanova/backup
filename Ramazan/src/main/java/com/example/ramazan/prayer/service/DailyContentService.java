@@ -6,12 +6,14 @@ import com.example.ramazan.prayer.dto.DailyContentCreateDto;
 import com.example.ramazan.prayer.mapper.DailyContentMapper;
 import com.example.ramazan.repository.DailyContentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class DailyContentService {
 
     private final DailyContentRepository dailyContentRepository;

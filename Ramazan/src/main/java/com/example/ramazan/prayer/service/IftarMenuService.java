@@ -6,20 +6,24 @@ import com.example.ramazan.model.Restaurant;
 import com.example.ramazan.prayer.dto.IftarMenuCreateDto;
 import com.example.ramazan.prayer.dto.IftarMenuResponseDto;
 import com.example.ramazan.prayer.mapper.IftarMenuMapper;
+import com.example.ramazan.prayer.notification.NotificationService;
 import com.example.ramazan.repository.IftarMenuRepository;
 import com.example.ramazan.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class IftarMenuService {
 
     private final IftarMenuRepository iftarMenuRepository;
     private final IftarMenuMapper iftarMenuMapper;
     private final RestaurantRepository restaurantRepository;
+    private final NotificationService notificationService;
 
     public IftarMenuResponseDto create(IftarMenuCreateDto dto){
 
@@ -34,6 +38,11 @@ public class IftarMenuService {
         IftarMenu entity = iftarMenuMapper.toEntity(dto, restaurant);
 
         IftarMenu saved = iftarMenuRepository.save(entity);
+
+        notificationService.sendToAll(
+                "Yeni Iftar Menu 🍽️",
+                saved.getTitle() + " əlavə olundu"
+        );
 
         return iftarMenuMapper.toDto(saved);
     }
