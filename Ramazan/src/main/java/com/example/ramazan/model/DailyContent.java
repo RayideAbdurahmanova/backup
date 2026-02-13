@@ -23,7 +23,7 @@ public class DailyContent {
     @Column(nullable = false)
     String ayahText;
     String ayahSource;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     String duaText;
     String duaSource;
 }
