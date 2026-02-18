@@ -44,9 +44,8 @@ public class PrayerTime {
     public PrayerTime(String method) {
         setMethod(method);
 
-        settings.put("imsak", "fajr");
         settings.put("dhuhr", "0 min");
-        settings.put("asr", "Standard");
+        settings.put("asr", "Hanafi");
         settings.put("highLats", "NightMiddle");
 
         for (String key : TIME_NAMES.keySet()) {
@@ -58,6 +57,10 @@ public class PrayerTime {
         if (METHODS.containsKey(method)) {
             adjust(METHODS.get(method).toMap());
             calcMethod = method;
+
+            if ("Tehran".equals(method) || "Jafari".equals(method)) {
+                settings.put("asr", "Jafari");
+            }
         }
     }
 
@@ -122,7 +125,7 @@ public class PrayerTime {
 
         double dhuhr = midDay(dayPort.get("dhuhr"));
         double fajr = sunAngleTime(eval(settings.get("fajr")), dayPort.get("fajr"), true);
-        double imsak = "fajr".equals(settings.get("imsak")) ? fajr : sunAngleTime(eval(settings.get("imsak")), dayPort.get("imsak"), true);
+        double imsak = fajr - 5.0 / 60.0;  // Sübhdən 5 dəqiqə əvvəl
         double sunrise = sunAngleTime(riseSetAngle(), dayPort.get("sunrise"), true);
         double asr = asrTime(asrFactor(settings.get("asr")), dayPort.get("asr"));
         double sunset = sunAngleTime(riseSetAngle(), dayPort.get("sunset"), false);
@@ -152,7 +155,9 @@ public class PrayerTime {
         double noon = midDay(time);
         double numerator = -Math.sin(Math.toRadians(angle)) - Math.sin(Math.toRadians(decl)) * Math.sin(Math.toRadians(latitude));
         double denominator = Math.cos(Math.toRadians(decl)) * Math.cos(Math.toRadians(latitude));
-        double t = Math.toDegrees(Math.acos(numerator / denominator)) / 15.0;
+        double x = numerator / denominator;
+        x = Math.max(-1, Math.min(1, x));
+        double t = Math.toDegrees(Math.acos(x)) / 15.0;
         return noon + (ccw ? -t : t);
     }
 
@@ -197,6 +202,7 @@ public class PrayerTime {
     private double asrFactor(Object asrParam) {
         if ("Hanafi".equals(asrParam)) return 2.0;
         if ("Standard".equals(asrParam)) return 1.0;
+        if ("Jafari".equals(asrParam)) return 1.5;
         return eval(asrParam);
     }
 

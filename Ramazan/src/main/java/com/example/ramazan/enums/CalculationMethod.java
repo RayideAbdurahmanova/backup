@@ -1,12 +1,13 @@
 package com.example.ramazan.enums;
 
 public enum CalculationMethod {
-    MWL,
-    ISNA,
+    MWL, //--
+    ISNA, //--
     Egypt,
-    Makkah,
+    Makkah, //--
     Karachi,
     Tehran,
+    CAUCASUS,
     Jafari;
 
 
@@ -19,7 +20,7 @@ public enum CalculationMethod {
             return CalculationMethod.valueOf(method);
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid calculation method: '" + method +
-                    "'. Allowed values: MWL, ISNA, Egypt, Makkah, Karachi, Tehran, Jafari");
+                    "'. Allowed values: MWL, ISNA, Egypt, Makkah, Karachi, Tehran,CAUCASUS, Jafari");
         }
     }
 }
