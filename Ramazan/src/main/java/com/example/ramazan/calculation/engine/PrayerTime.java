@@ -125,7 +125,7 @@ public class PrayerTime {
 
         double dhuhr = midDay(dayPort.get("dhuhr"));
         double fajr = sunAngleTime(eval(settings.get("fajr")), dayPort.get("fajr"), true);
-        double imsak = fajr - 5.0 / 60.0;  // Sübhdən 5 dəqiqə əvvəl
+        double imsak = fajr - 5.0 / 60.0;
         double sunrise = sunAngleTime(riseSetAngle(), dayPort.get("sunrise"), true);
         double asr = asrTime(asrFactor(settings.get("asr")), dayPort.get("asr"));
         double sunset = sunAngleTime(riseSetAngle(), dayPort.get("sunset"), false);
