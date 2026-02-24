@@ -1,18 +1,16 @@
-version: '3.9'
-
 services:
   mysql:
     image: mysql:5.7
     container_name: ramazan_mysql
     restart: always
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ramazan_app_db
+      MYSQL_USER: ramazan_app_user
+      MYSQL_PASSWORD: App_Str0ng!P@ss9
+      MYSQL_ROOT_PASSWORD: radacct_root_2025
 
     ports:
-      - "127.0.0.1:3306:3306"
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -23,7 +21,10 @@ services:
 
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ramazan-app:0.0.1-SNAPSHOT
     container_name: ramazan_app
     depends_on:
       - mysql
@@ -32,8 +33,8 @@ services:
       - "127.0.0.1:8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Baku
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      SPRING_DATASOURCE_USERNAME: ramazan_app_user
+      SPRING_DATASOURCE_PASSWORD: App_Str0ng!P@ss9
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
     networks:
       - admin_net

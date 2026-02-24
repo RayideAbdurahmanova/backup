@@ -1,4 +1,4 @@
-package com.example.ramazan.calculation.service;
+package com.example.ramazan.calculation;
 
 import org.springframework.stereotype.Service;
 

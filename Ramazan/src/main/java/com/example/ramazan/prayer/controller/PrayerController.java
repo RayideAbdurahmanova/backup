@@ -1,10 +1,11 @@
 package com.example.ramazan.prayer.controller;
 
-import com.example.ramazan.calculation.service.RamadanDayCal;
+import com.example.ramazan.calculation.RamadanDayCal;
 import com.example.ramazan.prayer.dto.PrayerTimesResponse;
 import com.example.ramazan.prayer.service.PrayerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,6 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/prayer")
 @RequiredArgsConstructor
+@Controller
 public class PrayerController {
 
     private final PrayerService prayerService;
