@@ -1,15 +1,18 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+
   docker:
-   compose:
+    compose:
       enabled: false
       lifecycle-management: none
+
   datasource:
     url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Baku
     username: ${MYSQL_USER}
     password: ${MYSQL_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,11 +21,13 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
 logging:
   level:
     root: INFO
@@ -33,6 +38,6 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-
-
+server:
+  forward-headers-strategy: framework
 
