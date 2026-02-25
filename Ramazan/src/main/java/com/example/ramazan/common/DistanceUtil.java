@@ -1,4 +1,4 @@
-package com.example.ramazan.common.util;
+package com.example.ramazan.common;
 
 public class DistanceUtil {
     private static final double EARTH_RADIUS_KM = 6371;

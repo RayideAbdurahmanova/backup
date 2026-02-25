@@ -22,7 +22,7 @@ public class IftarMenu {
     Integer id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id", nullable = false)
-    Restaurant restaurantId;
+    Restaurant restaurant;
     @Column(nullable = false)
     String title;
     @Column(columnDefinition = "TEXT")

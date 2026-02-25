@@ -1,11 +1,15 @@
 package com.example.ramazan.prayer.service;
 
-import com.example.ramazan.common.util.DistanceUtil;
+import com.example.ramazan.common.DistanceUtil;
 import com.example.ramazan.exception.RestaurantNotFoundException;
+import com.example.ramazan.model.IftarMenu;
 import com.example.ramazan.model.Restaurant;
 import com.example.ramazan.prayer.dto.RestaurantCreateDto;
+import com.example.ramazan.prayer.dto.RestaurantDto;
 import com.example.ramazan.prayer.mapper.RestaurantMapper;
+import com.example.ramazan.repository.IftarMenuRepository;
 import com.example.ramazan.repository.RestaurantRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,43 +30,46 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final RestaurantMapper restaurantMapper;
+    private final IftarMenuRepository iftarMenuRepository;
 
-    public List<Restaurant> nearBy(double lat,double lng,double radiusKm){
-         return restaurantRepository.findAll()
-                 .stream()
-                 .map(r->new RestaurantDistance(
-                         r,
-                         DistanceUtil.haversine(
-                                 lat,lng,
-                                 r.getLatitude(),r.getLongitude())
-                 ))
-                 .filter(rd->rd.distance<=radiusKm)
-                 .sorted(Comparator.comparingDouble(rd->rd.distance))
-                 .map(rd->rd.restaurant)
-                 .toList();
+    public List<RestaurantDto> nearBy(double lat, double lng, double radiusKm) {
+        return restaurantRepository.findAll()
+                .stream()
+                .map(r -> new RestaurantDistance(r, DistanceUtil.haversine(lat, lng, r.getLatitude(), r.getLongitude())))
+                .filter(rd -> rd.distance <= radiusKm)
+                .sorted(Comparator.comparingDouble(rd -> rd.distance))
+                .map(rd -> restaurantMapper.fromEntityToDto(rd.restaurant))
+                .toList();
     }
 
-    public Restaurant getById(Integer id) {
-        return restaurantRepository.findById(id)
-                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found"));
-    }
-    private record RestaurantDistance(Restaurant restaurant, double distance) {}
+    public RestaurantDto getById(Integer id) {
 
-    public Restaurant create(RestaurantCreateDto restaurant){
-        Restaurant newRestaurant=restaurantMapper.toEntity(restaurant);
+        return restaurantMapper.fromEntityToDto(restaurantRepository.findById(id)
+                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant not found")));
+    }
+
+    private record RestaurantDistance(Restaurant restaurant, double distance) {
+    }
+
+    public Restaurant create(RestaurantCreateDto restaurant) {
+        Restaurant newRestaurant = restaurantMapper.toEntity(restaurant);
         Restaurant saved = restaurantRepository.save(newRestaurant);
-        return  saved;
+        return saved;
     }
 
     public void delete(Integer id) {
-        Restaurant restaurant = getById(id);
+        Restaurant restaurant = restaurantRepository.findById(id).orElseThrow(
+                () -> new RestaurantNotFoundException("Restaurant tapılmadı: id = " + id)
+        );
         restaurantRepository.delete(restaurant);
     }
 
-    public Restaurant update(Integer id, RestaurantCreateDto restaurantDetails) {
-        Restaurant restaurant = getById(id);
+    public RestaurantDto update(Integer id, RestaurantCreateDto restaurantDetails) {
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RestaurantNotFoundException("Restaurant tapılmadı: id = " + id));
         restaurantMapper.updateEntity(restaurantDetails, restaurant);
-        return restaurantRepository.save(restaurant);
+        Restaurant updatedRestaurant = restaurantRepository.save(restaurant);
+        return restaurantMapper.fromEntityToDto(updatedRestaurant);
     }
 
     public String saveImage(MultipartFile file) throws IOException {
@@ -82,6 +89,43 @@ public class RestaurantService {
         return "/uploads/" + fileName;
     }
 
+    public List<IftarMenu> getMenus(Integer id) {
+        Restaurant restaurant = restaurantRepository.findById(id).orElseThrow(
+                () -> new RestaurantNotFoundException("Restoran tapılmadı")
+        );
+        return iftarMenuRepository.findByRestaurant_Id(restaurant.getId());
 
+    }
+
+    public List<RestaurantDto> getMainPageRestaurants() {
+        List<Restaurant> promoted = restaurantRepository.findByHasAdvertisementTrue();
+        return promoted.stream()
+                .map(restaurantMapper::fromEntityToDto)
+                .toList();
+    }
+
+    public RestaurantDto changeRestaurantToPrompted(Integer id) {
+       Restaurant restaurant=restaurantRepository.findById(id).orElseThrow(
+               ()-> new RestaurantNotFoundException("Restoran tapılmadı")
+       );
+
+        restaurant.setHasAdvertisement(true);
+        Restaurant updated = restaurantRepository.save(restaurant);
+        return restaurantMapper.fromEntityToDto(updated);
+
+    }
+
+    @Transactional
+    public void deactive(Integer id) {
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RestaurantNotFoundException("Restoran tapılmadı: " + id));
+
+        if (!restaurant.isHasAdvertisement()) {
+            throw new IllegalStateException("Restoran artıq silinib/deaktiv edilib");
+        }
+
+        restaurant.setHasAdvertisement(false);
+        restaurantRepository.save(restaurant);
+    }
 
 }

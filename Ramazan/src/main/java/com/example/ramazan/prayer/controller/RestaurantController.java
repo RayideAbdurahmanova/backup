@@ -3,6 +3,7 @@ package com.example.ramazan.prayer.controller;
 import com.example.ramazan.model.IftarMenu;
 import com.example.ramazan.model.Restaurant;
 import com.example.ramazan.prayer.dto.RestaurantCreateDto;
+import com.example.ramazan.prayer.dto.RestaurantDto;
 import com.example.ramazan.prayer.service.RestaurantService;
 import com.example.ramazan.repository.IftarMenuRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +29,7 @@ public class RestaurantController {
     private final IftarMenuRepository iftarMenuRepository;
 
     @GetMapping("/nearby")
-    public List<Restaurant> nearby(
+    public List<RestaurantDto> nearby(
             @RequestParam double lat,
             @RequestParam double lng,
             @RequestParam double radiusKm
@@ -37,14 +38,13 @@ public class RestaurantController {
     }
 
     @GetMapping("/{id}")
-    public Restaurant getById(@PathVariable Integer id) {
+    public RestaurantDto getById(@PathVariable Integer id) {
         return restaurantService.getById(id);
     }
 
     @GetMapping("/{id}/menus")
     public List<IftarMenu> getMenus(@PathVariable Integer id) {
-        Restaurant restaurant = restaurantService.getById(id);
-        return iftarMenuRepository.findByRestaurantId(restaurant);
+        return restaurantService.getMenus(id);
     }
 
     @PostMapping
@@ -56,11 +56,11 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Restaurant> update(
+    public ResponseEntity<RestaurantDto> update(
             @PathVariable Integer id,
             @RequestBody RestaurantCreateDto dto
     ) {
-        Restaurant updated = restaurantService.update(id, dto);
+        RestaurantDto updated = restaurantService.update(id, dto);
         return ResponseEntity.ok(updated);
     }
 
@@ -79,6 +79,21 @@ public class RestaurantController {
     ) throws IOException {
         String imageUrl = restaurantService.saveImage(file);
         return ResponseEntity.ok(imageUrl);
+    }
+
+    @GetMapping("/promted")
+    public List<RestaurantDto> getMainPageRestaurants() {
+        return  restaurantService.getMainPageRestaurants();
+    }
+
+    @PutMapping("/to-promoted/{id}")
+    public RestaurantDto changeRestaurantToPromoted(@PathVariable Integer id) {
+        return  restaurantService.changeRestaurantToPrompted(id);
+    }
+
+    @PutMapping("/deactive/{id}")
+    public void deactive(@PathVariable Integer id) {
+        restaurantService.deactive(id);
     }
 
 

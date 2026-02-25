@@ -47,7 +47,8 @@ public class Restaurant {
     String closeTime;
     @Column(name = "created_at",nullable = false, updatable = false)
     LocalDateTime createdAt;
-
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean hasAdvertisement;
 
     @PrePersist
     public void prePersist() {
