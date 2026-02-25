@@ -127,5 +127,4 @@ public class RestaurantService {
         restaurant.setHasAdvertisement(false);
         restaurantRepository.save(restaurant);
     }
-
 }
