@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 @Slf4j
 public class IftarMenuService {
 
+
     private final IftarMenuRepository iftarMenuRepository;
     private final IftarMenuMapper iftarMenuMapper;
     private final RestaurantRepository restaurantRepository;
