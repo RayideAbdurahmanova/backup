@@ -1,11 +1,12 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+
   docker:
-   compose:
-      enabled: true
-      file: Ramazan/docker-compose.yml
+    compose:
+      enabled: false
       lifecycle-management: none
+
   datasource:
     url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Baku
     username: ${MYSQL_USER}
@@ -34,6 +35,6 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
-
-
+server:
+  forward-headers-strategy: framework
 
