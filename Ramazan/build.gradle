@@ -9,9 +9,19 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 description = 'Ramazan'
 
+bootBuildImage {
+    imageName = "ramazan-app:${project.version}"
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
     }
 }
 
@@ -53,14 +63,7 @@ dependencyManagement {
     }
 }
 
-generateJava {
-    schemaPaths = ["${projectDir}/src/main/resources/graphql-client"]
-    packageName = 'com.example.ramada.codegen'
-    generateClient = true
-}
 
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-

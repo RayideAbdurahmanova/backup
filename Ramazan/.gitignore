@@ -38,4 +38,5 @@ out/
 
 # Environment file
 src/main/java/com/example/ramazan/project/project.env
-
+Ramazan/src/main/resources/firebase-service-account.json
+firebase-service-account.json

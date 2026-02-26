@@ -52,10 +52,10 @@ public class IftarMenuService {
         IftarMenu menu = iftarMenuRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("IftarMenu not found"));
 
-        if (!menu.getRestaurantId().getId().equals(dto.getRestaurantId())) {
+        if (!menu.getRestaurant().getId().equals(dto.getRestaurantId())) {
             Restaurant restaurant = restaurantRepository.findById(dto.getRestaurantId())
                     .orElseThrow(() -> new RuntimeException("Restaurant not found"));
-            menu.setRestaurantId(restaurant);
+            menu.setRestaurant(restaurant);
         }
 
 

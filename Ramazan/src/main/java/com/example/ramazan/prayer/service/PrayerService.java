@@ -29,7 +29,6 @@ public class PrayerService {
                                         Double tz,
                                         String method) {
 
-
         LocalDate requestDate = parseDate(dateStr);
 
         double usedTz = (tz == null) ? 4.0 : tz;

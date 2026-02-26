@@ -11,7 +11,7 @@ public interface IftarMenuMapper {
 
     default IftarMenu toEntity(IftarMenuCreateDto dto, Restaurant restaurant){
         IftarMenu menu = new IftarMenu();
-        menu.setRestaurantId(restaurant);
+        menu.setRestaurant(restaurant);
         menu.setTitle(dto.getTitle());
         menu.setDescription(dto.getDescription());
         menu.setPrice(dto.getPrice());
@@ -22,7 +22,7 @@ public interface IftarMenuMapper {
     default IftarMenuResponseDto toDto(IftarMenu menu){
         return IftarMenuResponseDto.builder()
                 .id(menu.getId())
-                .restaurantId(menu.getRestaurantId().getId())
+                .restaurantId(menu.getRestaurant().getId())
                 .title(menu.getTitle())
                 .description(menu.getDescription())
                 .price(menu.getPrice())
