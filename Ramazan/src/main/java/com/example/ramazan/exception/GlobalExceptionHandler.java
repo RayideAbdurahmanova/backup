@@ -2,12 +2,14 @@ package com.example.ramazan.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.format.DateTimeParseException;
 import java.util.Collections;
+import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -43,16 +45,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(InvalidIftarMenuException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidIftar(InvalidIftarMenuException ex) {
-        ErrorResponse response = new ErrorResponse(
-                "BAD_REQUEST",
-                ex.getMessage(),
-                Collections.emptyList()
-
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
 
 
     @ExceptionHandler(RestaurantNotFoundException.class)
@@ -74,5 +66,26 @@ public class GlobalExceptionHandler {
                 Collections.emptyList()
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(InvalidIftarMenuException.class)
+    public ResponseEntity<?> handleInvalidIftarMenu(InvalidIftarMenuException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                        "error", "Validation Error",
+                        "message", ex.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
+        ErrorResponse response=new ErrorResponse(
+                "Invalid JSON format",
+                ex.getLocalizedMessage(),
+                Collections.emptyList()
+        );
+        return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
