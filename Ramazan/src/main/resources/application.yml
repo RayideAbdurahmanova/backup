@@ -2,6 +2,9 @@ spring:
   config:
     import: optional:file:.env[.properties]
 
+  liquibase:
+    enabled: false
+
   docker:
     compose:
       enabled: false
