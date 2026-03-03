@@ -28,9 +28,11 @@ public class IftarMenu {
     @Column(columnDefinition = "TEXT")
     String description;
     BigDecimal price;
-    @Column(columnDefinition = "JSON")
-    @JdbcTypeCode(SqlTypes.JSON)
-    String imageUrlsJson;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB",name = "cover_image_url")
+    byte[] coverImageUrl;
+    @Column(name = "cover_image_type", length = 50)
+    private String coverImageType;
     Boolean isActive=true;
 
 }

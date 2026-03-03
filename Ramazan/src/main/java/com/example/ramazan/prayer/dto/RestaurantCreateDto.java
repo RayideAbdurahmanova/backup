@@ -28,7 +28,6 @@ public class RestaurantCreateDto {
     private String link3;
     private String link4;
     private String link5;
-    private String coverImageUrl;
     private String openTime;
     private String closeTime;
     @NotBlank(message = "Email cannot be empty")

@@ -23,7 +23,6 @@ public class RestaurantDto {
     Double latitude;
     Double longitude;
     String phone;
-    String coverImageUrl;
     String openTime;
     String closeTime;
     LocalDateTime createdAt;

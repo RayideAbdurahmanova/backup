@@ -12,7 +12,15 @@ import com.example.ramazan.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -127,4 +135,52 @@ public class RestaurantService {
         restaurant.setHasAdvertisement(false);
         restaurantRepository.save(restaurant);
     }
+
+
+
+    public ResponseEntity<String> uploadCoverImage(
+             Integer id,
+             MultipartFile file) {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("Fayl boşdur");
+        }
+
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Restoran tapılmadı"));
+
+        try {
+            restaurant.setCoverImageUrl(file.getBytes());
+            restaurant.setCoverImageType(file.getContentType());
+
+            restaurantRepository.save(restaurant);
+
+            return ResponseEntity.ok("Şəkil uğurla yükləndi, ID: " + id);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Şəkil oxunmadı: " + e.getMessage());
+        }
+    }
+
+
+
+    public ResponseEntity<byte[]> getCoverImage(Integer id) {
+
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Restoran tapılmadı"));
+
+        byte[] imageBytes = restaurant.getCoverImageUrl();
+
+        if (imageBytes == null || imageBytes.length == 0) {
+            return ResponseEntity.notFound().build();
+        }
+
+        MediaType contentType = MediaType.IMAGE_JPEG;
+
+        return ResponseEntity.ok()
+                .contentType(contentType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline")
+                .body(imageBytes);
+    }
+
 }

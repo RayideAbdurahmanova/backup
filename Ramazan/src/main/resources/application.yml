@@ -40,4 +40,3 @@ logging:
 
 server:
   forward-headers-strategy: framework
-

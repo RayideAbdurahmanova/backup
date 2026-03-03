@@ -14,6 +14,5 @@ public class IftarMenuResponseDto {
     private String title;
     private String description;
     private BigDecimal price;
-    private String imageUrlsJson;
     private Boolean isActive;
 }

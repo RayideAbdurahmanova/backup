@@ -42,7 +42,11 @@ public class Restaurant {
     @Column(nullable = false)
     Double longitude;
     String phone;
-    String coverImageUrl;
+    @Lob
+    @Column(columnDefinition = "MEDIUMBLOB",name = "cover_image_url")
+    byte[] coverImageUrl;
+    @Column(name = "cover_image_type", length = 50)
+    private String coverImageType;
     String openTime;
     String closeTime;
     @Column(name = "created_at",nullable = false, updatable = false)
