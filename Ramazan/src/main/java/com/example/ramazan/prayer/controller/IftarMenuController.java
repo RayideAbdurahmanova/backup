@@ -38,8 +38,10 @@ public class IftarMenuController {
     @PutMapping("/{id}")
     public IftarMenuResponseDto update(@PathVariable Integer id,
                                        @Valid @RequestBody IftarMenuCreateDto iftarMenuCreateDto) {
+
         return iftarMenuService.update(id, iftarMenuCreateDto);
     }
+
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id) {
