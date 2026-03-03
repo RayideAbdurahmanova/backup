@@ -15,7 +15,6 @@ public interface IftarMenuMapper {
         menu.setTitle(dto.getTitle());
         menu.setDescription(dto.getDescription());
         menu.setPrice(dto.getPrice());
-        menu.setImageUrlsJson(dto.getImageUrlsJson());
         menu.setIsActive(true);
         return menu;
     }
@@ -26,7 +25,6 @@ public interface IftarMenuMapper {
                 .title(menu.getTitle())
                 .description(menu.getDescription())
                 .price(menu.getPrice())
-                .imageUrlsJson(menu.getImageUrlsJson())
                 .isActive(menu.getIsActive())
                 .build();
     }}

@@ -20,7 +20,5 @@ public class IftarMenuCreateDto {
     String description;
     @NotNull(message= "Price cannot be null")
     BigDecimal price;
-    @NotBlank(message = "Image cannot be null")
-    String imageUrlsJson;
     Boolean isActive = true;
 }

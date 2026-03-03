@@ -6,17 +6,23 @@ import com.example.ramazan.prayer.dto.RestaurantCreateDto;
 import com.example.ramazan.prayer.dto.RestaurantDto;
 import com.example.ramazan.prayer.service.RestaurantService;
 import com.example.ramazan.repository.IftarMenuRepository;
+import com.example.ramazan.repository.RestaurantRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -27,6 +33,7 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
     private final IftarMenuRepository iftarMenuRepository;
+    private final RestaurantRepository restaurantRepository;
 
     @GetMapping("/nearby")
     public List<RestaurantDto> nearby(
@@ -71,24 +78,32 @@ public class RestaurantController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Upload restaurant image (PNG/JPG)")
-    public ResponseEntity<String> uploadImage(
-            @Parameter(description = "Choose image file (PNG/JPG)")
-            @RequestPart("file") MultipartFile file
-    ) throws IOException {
-        String imageUrl = restaurantService.saveImage(file);
-        return ResponseEntity.ok(imageUrl);
+
+    @PostMapping(
+            value = "/{id}/cover",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    @Transactional
+    public ResponseEntity<String> uploadCoverImage(
+            @PathVariable Integer id,
+            @RequestParam("file") MultipartFile file) {
+        return restaurantService.uploadCoverImage(id, file);
+    }
+
+
+    @GetMapping(value = "/{id}/cover")
+    public ResponseEntity<byte[]> getCoverImage(@PathVariable Integer id) {
+        return restaurantService.getCoverImage(id);
     }
 
     @GetMapping("/promted")
     public List<RestaurantDto> getMainPageRestaurants() {
-        return  restaurantService.getMainPageRestaurants();
+        return restaurantService.getMainPageRestaurants();
     }
 
     @PutMapping("/to-promoted/{id}")
     public RestaurantDto changeRestaurantToPromoted(@PathVariable Integer id) {
-        return  restaurantService.changeRestaurantToPrompted(id);
+        return restaurantService.changeRestaurantToPrompted(id);
     }
 
     @PutMapping("/deactive/{id}")
