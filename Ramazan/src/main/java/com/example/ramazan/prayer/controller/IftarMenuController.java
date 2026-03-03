@@ -58,6 +58,7 @@ public class IftarMenuController {
             @PathVariable Integer id,
             @RequestParam("file") MultipartFile file) {
         return iftarMenuService.uploadCoverImage(id, file);
+
     }
 
 
